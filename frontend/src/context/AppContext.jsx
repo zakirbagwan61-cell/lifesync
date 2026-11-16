@@ -3,7 +3,7 @@ import useLocalStorage from '../hooks/useLocalStorage'
 import { generateId, todayString, addDays, addMonths } from '../utils/helpers'
 
 // Context = one shared store that every page can read from.
-// Phase 3 added bills. Phase 4 adds documents.
+// Phase 3 added bills, Phase 4 documents, Phase 5 subscriptions.
 const AppContext = createContext(null)
 
 // Sample bills shown on the very first visit, so the app doesn't look empty.
@@ -31,10 +31,22 @@ function createSeedDocuments() {
   ]
 }
 
+// Sample subscriptions. cycle is 'Monthly' or 'Yearly'.
+function createSeedSubscriptions() {
+  const today = todayString()
+  return [
+    { id: generateId(), name: 'Netflix', cost: 649, cycle: 'Monthly', nextRenewal: addDays(today, 5), autoRenew: true },
+    { id: generateId(), name: 'Spotify', cost: 119, cycle: 'Monthly', nextRenewal: addDays(today, 14), autoRenew: true },
+    { id: generateId(), name: 'YouTube Premium', cost: 1290, cycle: 'Yearly', nextRenewal: addDays(today, 120), autoRenew: true },
+    { id: generateId(), name: 'Amazon Prime', cost: 1499, cycle: 'Yearly', nextRenewal: addDays(today, 200), autoRenew: false },
+  ]
+}
+
 export function AppProvider({ children }) {
   const [userName, setUserName] = useLocalStorage('lifesync_user', 'Friend')
   const [bills, setBills] = useLocalStorage('lifesync_bills', createSeedBills())
   const [documents, setDocuments] = useLocalStorage('lifesync_documents', createSeedDocuments())
+  const [subscriptions, setSubscriptions] = useLocalStorage('lifesync_subscriptions', createSeedSubscriptions())
 
   // ----- Bill actions -----
   // Each action uses setBills(prev => ...) so it always works on the latest list.
@@ -78,6 +90,26 @@ export function AppProvider({ children }) {
 
   const deleteDocument = (id) => setDocuments((prev) => prev.filter((d) => d.id !== id))
 
+  // ----- Subscription actions -----
+  const addSubscription = (data) =>
+    setSubscriptions((prev) => [...prev, { ...data, id: generateId() }])
+
+  const updateSubscription = (id, changes) =>
+    setSubscriptions((prev) => prev.map((s) => (s.id === id ? { ...s, ...changes } : s)))
+
+  const deleteSubscription = (id) =>
+    setSubscriptions((prev) => prev.filter((s) => s.id !== id))
+
+  // Mark a subscription as renewed: move the renewal date forward by one billing cycle.
+  const renewSubscription = (id) =>
+    setSubscriptions((prev) =>
+      prev.map((s) =>
+        s.id === id
+          ? { ...s, nextRenewal: addMonths(s.nextRenewal, s.cycle === 'Yearly' ? 12 : 1) }
+          : s
+      )
+    )
+
   const value = {
     userName,
     setUserName,
@@ -90,6 +122,11 @@ export function AppProvider({ children }) {
     addDocument,
     updateDocument,
     deleteDocument,
+    subscriptions,
+    addSubscription,
+    updateSubscription,
+    deleteSubscription,
+    renewSubscription,
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
