@@ -44,10 +44,10 @@ Files are created only in the phase that needs them.
 
 ## Phase 2: Shared UI components
 **Goal:** reusable building blocks, so later phases go fast.
-- [ ] `Modal`, `PageHeader`, `EmptyState`, `StatCard`
-- [ ] `StatusBadge` (overdue, due soon, paid, pending, expired, valid)
-- [ ] `ItemForm` driven by a field-config array (text, number, date, select, checkbox)
-- [ ] Form validation (required fields, valid dates)
+- [x] `Modal`, `PageHeader`, `EmptyState`, `StatCard`
+- [x] `StatusBadge` (overdue, due soon, paid, pending, expired, valid)
+- [x] `ItemForm` driven by a field-config array (text, number, date, select, checkbox)
+- [x] Form validation (required fields, valid dates)
 
 **Done when:** a demo modal with a form opens, validates and returns values.
 
@@ -119,7 +119,7 @@ Files are created only in the phase that needs them.
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Foundation | Done |
-| 2 | Shared UI | Not started |
+| 2 | Shared UI | Done |
 | 3 | Bills | Not started |
 | 4 | Documents | Not started |
 | 5 | Subscriptions | Not started |

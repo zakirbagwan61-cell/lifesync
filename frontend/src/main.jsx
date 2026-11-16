@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { AppProvider } from './context/AppContext'
 import App from './App'
 import './styles/index.css'
+import './styles/components.css'
 
 // BrowserRouter enables routing; AppProvider shares app data with every page.
 createRoot(document.getElementById('root')).render(
