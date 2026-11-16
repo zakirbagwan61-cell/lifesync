@@ -43,3 +43,23 @@ export const isOverdue = (dateString) => {
   const days = daysUntil(dateString)
   return days !== null && days < 0
 }
+
+// ----- Date helpers added in Phase 3 -----
+const pad = (n) => String(n).padStart(2, '0')
+
+// Date object -> "YYYY-MM-DD"
+export const toDateString = (d) =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+
+// "2026-11-16" + 5 days -> "2026-11-21"
+export const addDays = (dateString, days) => {
+  const [y, m, d] = dateString.split('-').map(Number)
+  return toDateString(new Date(y, m - 1, d + days))
+}
+
+// "2026-01-31" + 1 month -> "2026-02-28" (keeps the day inside the shorter month)
+export const addMonths = (dateString, months) => {
+  const [y, m, d] = dateString.split('-').map(Number)
+  const lastDay = new Date(y, m - 1 + months + 1, 0).getDate()
+  return toDateString(new Date(y, m - 1 + months, Math.min(d, lastDay)))
+}
