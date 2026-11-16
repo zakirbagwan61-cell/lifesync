@@ -3,7 +3,7 @@ import useLocalStorage from '../hooks/useLocalStorage'
 import { generateId, todayString, addDays, addMonths } from '../utils/helpers'
 
 // Context = one shared store that every page can read from.
-// Phase 3 adds the bills list and the actions that change it.
+// Phase 3 added bills. Phase 4 adds documents.
 const AppContext = createContext(null)
 
 // Sample bills shown on the very first visit, so the app doesn't look empty.
@@ -19,9 +19,22 @@ function createSeedBills() {
   ]
 }
 
+// Sample documents (the numbers are fake). expiryDate is empty for documents that never expire.
+function createSeedDocuments() {
+  const today = todayString()
+  return [
+    { id: generateId(), type: 'Aadhaar', holder: 'Your Name', number: 'XXXX XXXX 1234', issueDate: '2018-05-10', expiryDate: '', notes: '' },
+    { id: generateId(), type: 'PAN', holder: 'Your Name', number: 'ABCDE1234F', issueDate: '2017-03-02', expiryDate: '', notes: '' },
+    { id: generateId(), type: 'Passport', holder: 'Your Name', number: 'P1234567', issueDate: '2021-08-15', expiryDate: addDays(today, 400), notes: 'Renew 6 months before expiry' },
+    { id: generateId(), type: 'Driving Licence', holder: 'Your Name', number: 'DL-0420110012345', issueDate: '2016-01-20', expiryDate: addDays(today, 45), notes: '' },
+    { id: generateId(), type: 'Insurance', holder: 'Your Name', number: 'POL-998877', issueDate: '2025-01-01', expiryDate: addDays(today, -10), notes: 'Health insurance' },
+  ]
+}
+
 export function AppProvider({ children }) {
   const [userName, setUserName] = useLocalStorage('lifesync_user', 'Friend')
   const [bills, setBills] = useLocalStorage('lifesync_bills', createSeedBills())
+  const [documents, setDocuments] = useLocalStorage('lifesync_documents', createSeedDocuments())
 
   // ----- Bill actions -----
   // Each action uses setBills(prev => ...) so it always works on the latest list.
@@ -56,6 +69,15 @@ export function AppProvider({ children }) {
       return updated
     })
 
+  // ----- Document actions -----
+  const addDocument = (data) =>
+    setDocuments((prev) => [...prev, { ...data, id: generateId() }])
+
+  const updateDocument = (id, changes) =>
+    setDocuments((prev) => prev.map((d) => (d.id === id ? { ...d, ...changes } : d)))
+
+  const deleteDocument = (id) => setDocuments((prev) => prev.filter((d) => d.id !== id))
+
   const value = {
     userName,
     setUserName,
@@ -64,6 +86,10 @@ export function AppProvider({ children }) {
     updateBill,
     deleteBill,
     markBillPaid,
+    documents,
+    addDocument,
+    updateDocument,
+    deleteDocument,
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
