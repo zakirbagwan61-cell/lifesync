@@ -437,3 +437,38 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== Tasks & Appointments (added in Phase 6) ===== */
+.toolbar-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.check-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  display: inline-flex;
+  padding: 2px;
+}
+
+.check-btn:hover {
+  color: var(--primary);
+}
+
+.check-btn.done {
+  color: var(--success);
+}
+
+.done-text strong {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.muted-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+}

@@ -3,7 +3,7 @@ import useLocalStorage from '../hooks/useLocalStorage'
 import { generateId, todayString, addDays, addMonths } from '../utils/helpers'
 
 // Context = one shared store that every page can read from.
-// Phase 3 added bills, Phase 4 documents, Phase 5 subscriptions.
+// Phase 3 added bills, Phase 4 documents, Phase 5 subscriptions, Phase 6 tasks + appointments.
 const AppContext = createContext(null)
 
 // Sample bills shown on the very first visit, so the app doesn't look empty.
@@ -42,11 +42,36 @@ function createSeedSubscriptions() {
   ]
 }
 
+// Sample tasks. priority is 'High', 'Medium' or 'Low'.
+function createSeedTasks() {
+  const today = todayString()
+  return [
+    { id: generateId(), title: 'Call insurance agent', priority: 'High', deadline: addDays(today, -1), completed: false, completedAt: null },
+    { id: generateId(), title: 'Pay school fees', priority: 'High', deadline: addDays(today, 1), completed: false, completedAt: null },
+    { id: generateId(), title: 'Buy groceries', priority: 'Medium', deadline: today, completed: false, completedAt: null },
+    { id: generateId(), title: 'Renew library card', priority: 'Low', deadline: addDays(today, 7), completed: false, completedAt: null },
+    { id: generateId(), title: 'Submit tax documents', priority: 'High', deadline: addDays(today, -5), completed: true, completedAt: addDays(today, -6) },
+  ]
+}
+
+// Sample appointments. time is 24-hour "HH:MM".
+function createSeedAppointments() {
+  const today = todayString()
+  return [
+    { id: generateId(), title: 'Team meeting', date: today, time: '15:00', location: 'Google Meet', completed: false },
+    { id: generateId(), title: 'Dentist check-up', date: addDays(today, 2), time: '10:30', location: 'Smile Dental Clinic', completed: false },
+    { id: generateId(), title: 'Car service', date: addDays(today, 9), time: '09:00', location: 'Service centre', completed: false },
+    { id: generateId(), title: 'Parent-teacher meeting', date: addDays(today, -4), time: '11:00', location: 'School', completed: true },
+  ]
+}
+
 export function AppProvider({ children }) {
   const [userName, setUserName] = useLocalStorage('lifesync_user', 'Friend')
   const [bills, setBills] = useLocalStorage('lifesync_bills', createSeedBills())
   const [documents, setDocuments] = useLocalStorage('lifesync_documents', createSeedDocuments())
   const [subscriptions, setSubscriptions] = useLocalStorage('lifesync_subscriptions', createSeedSubscriptions())
+  const [tasks, setTasks] = useLocalStorage('lifesync_tasks', createSeedTasks())
+  const [appointments, setAppointments] = useLocalStorage('lifesync_appointments', createSeedAppointments())
 
   // ----- Bill actions -----
   // Each action uses setBills(prev => ...) so it always works on the latest list.
@@ -110,6 +135,37 @@ export function AppProvider({ children }) {
       )
     )
 
+  // ----- Task actions -----
+  const addTask = (data) =>
+    setTasks((prev) => [...prev, { ...data, id: generateId(), completed: false, completedAt: null }])
+
+  const updateTask = (id, changes) =>
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...changes } : t)))
+
+  const deleteTask = (id) => setTasks((prev) => prev.filter((t) => t.id !== id))
+
+  // Flip a task between pending and completed.
+  const toggleTask = (id) =>
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? { ...t, completed: !t.completed, completedAt: t.completed ? null : todayString() }
+          : t
+      )
+    )
+
+  // ----- Appointment actions -----
+  const addAppointment = (data) =>
+    setAppointments((prev) => [...prev, { ...data, id: generateId(), completed: false }])
+
+  const updateAppointment = (id, changes) =>
+    setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, ...changes } : a)))
+
+  const deleteAppointment = (id) => setAppointments((prev) => prev.filter((a) => a.id !== id))
+
+  const toggleAppointment = (id) =>
+    setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, completed: !a.completed } : a)))
+
   const value = {
     userName,
     setUserName,
@@ -127,6 +183,16 @@ export function AppProvider({ children }) {
     updateSubscription,
     deleteSubscription,
     renewSubscription,
+    tasks,
+    addTask,
+    updateTask,
+    deleteTask,
+    toggleTask,
+    appointments,
+    addAppointment,
+    updateAppointment,
+    deleteAppointment,
+    toggleAppointment,
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
