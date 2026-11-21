@@ -8,19 +8,13 @@ import Modal from '../components/common/Modal'
 import ItemForm from '../components/common/ItemForm'
 import { formatCurrency, formatDate, daysUntil } from '../utils/helpers'
 
-const CYCLES = ['Monthly', 'Yearly']
+import { CYCLES, subscriptionFields } from '../utils/fields'
+import { useConfirm } from '../context/ConfirmContext'
 
 // A subscription is "renewing soon" when it renews within this many days.
 const SOON_DAYS = 7
 
-// Fields for the shared ItemForm.
-const subscriptionFields = [
-  { name: 'name', label: 'Service name', type: 'text', required: true, placeholder: 'e.g. Netflix' },
-  { name: 'cost', label: 'Cost (₹)', type: 'number', required: true },
-  { name: 'cycle', label: 'Billing cycle', type: 'select', options: CYCLES, required: true },
-  { name: 'nextRenewal', label: 'Next renewal date', type: 'date', required: true },
-  { name: 'autoRenew', label: 'Auto-renew is on', type: 'checkbox' },
-]
+
 
 // Cost converted to a per-month figure, so monthly and yearly plans can be added together.
 // Example: a Yearly plan of ₹1200 counts as ₹100 per month.
@@ -43,6 +37,7 @@ export default function Subscriptions() {
     deleteSubscription,
     renewSubscription,
   } = useApp()
+  const confirm = useConfirm()
 
   const [cycleFilter, setCycleFilter] = useState('All')
   const [modalOpen, setModalOpen] = useState(false)
@@ -74,8 +69,9 @@ export default function Subscriptions() {
     closeModal()
   }
 
-  const handleDelete = (sub) => {
-    if (window.confirm(`Delete "${sub.name}"?`)) deleteSubscription(sub.id)
+    const handleDelete = async (sub) => {
+    const ok = await confirm({ title: 'Delete subscription', message: `Delete "${sub.name}"? This cannot be undone.` })
+    if (ok) deleteSubscription(sub.id)
   }
 
   return (

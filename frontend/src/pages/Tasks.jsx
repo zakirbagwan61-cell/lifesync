@@ -11,23 +11,10 @@ import EmptyState from '../components/common/EmptyState'
 import Modal from '../components/common/Modal'
 import ItemForm from '../components/common/ItemForm'
 import { formatDate, daysUntil, todayString } from '../utils/helpers'
+import { PRIORITIES, taskFields, appointmentFields } from '../utils/fields'
+import { useConfirm } from '../context/ConfirmContext'
 
-const PRIORITIES = ['High', 'Medium', 'Low']
 const PRIORITY_RANK = { High: 0, Medium: 1, Low: 2 } // used for sorting
-
-// Fields for the shared ItemForm: one set for tasks, one for appointments.
-const taskFields = [
-  { name: 'title', label: 'Task', type: 'text', required: true, placeholder: 'e.g. Pay school fees' },
-  { name: 'priority', label: 'Priority', type: 'select', options: PRIORITIES, required: true },
-  { name: 'deadline', label: 'Deadline', type: 'date', required: true },
-]
-
-const appointmentFields = [
-  { name: 'title', label: 'Appointment', type: 'text', required: true, placeholder: 'e.g. Dentist check-up' },
-  { name: 'date', label: 'Date', type: 'date', required: true },
-  { name: 'time', label: 'Time', type: 'time', required: true },
-  { name: 'location', label: 'Location', type: 'text', placeholder: 'Optional' },
-]
 
 // Which badge to show next to a date: done, overdue, due within 2 days, or normal.
 function getDueStatus(dateString, completed) {
@@ -53,6 +40,7 @@ export default function Tasks() {
     tasks, addTask, updateTask, deleteTask, toggleTask,
     appointments, addAppointment, updateAppointment, deleteAppointment, toggleAppointment,
   } = useApp()
+  const confirm = useConfirm()
 
   const [tab, setTab] = useState('tasks') // 'tasks' | 'appointments'
   const [statusFilter, setStatusFilter] = useState('pending') // 'pending' | 'completed' | 'all'
@@ -106,8 +94,9 @@ export default function Tasks() {
     closeModal()
   }
 
-  const handleDelete = (item) => {
-    if (!window.confirm(`Delete "${item.title}"?`)) return
+    const handleDelete = async (item) => {
+    const ok = await confirm({ title: `Delete ${isTasks ? 'task' : 'appointment'}`, message: `Delete "${item.title}"? This cannot be undone.` })
+    if (!ok) return
     isTasks ? deleteTask(item.id) : deleteAppointment(item.id)
   }
 

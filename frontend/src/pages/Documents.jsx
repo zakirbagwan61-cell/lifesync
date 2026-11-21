@@ -12,7 +12,8 @@ import Modal from '../components/common/Modal'
 import ItemForm from '../components/common/ItemForm'
 import { formatDate, daysUntil } from '../utils/helpers'
 
-const DOC_TYPES = ['Aadhaar', 'PAN', 'Passport', 'Driving Licence', 'Insurance', 'Other']
+import { DOC_TYPES, documentFields } from '../utils/fields'
+import { useConfirm } from '../context/ConfirmContext'
 
 // One icon per document type.
 const TYPE_ICONS = {
@@ -27,15 +28,7 @@ const TYPE_ICONS = {
 // A document counts as "expiring soon" when it expires within this many days.
 const ALERT_DAYS = 60
 
-// Fields for the shared ItemForm. Expiry date is optional (Aadhaar and PAN never expire).
-const documentFields = [
-  { name: 'type', label: 'Document type', type: 'select', options: DOC_TYPES, required: true },
-  { name: 'holder', label: 'Holder name', type: 'text', required: true },
-  { name: 'number', label: 'Document number', type: 'text', required: true },
-  { name: 'issueDate', label: 'Issue date', type: 'date' },
-  { name: 'expiryDate', label: 'Expiry date (leave empty if it never expires)', type: 'date' },
-  { name: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Optional' },
-]
+
 
 // 'expired' | 'expiring' | 'valid' | null (null = no expiry date)
 function getExpiryStatus(doc) {
@@ -57,6 +50,7 @@ function expiryText(doc) {
 
 export default function Documents() {
   const { documents, addDocument, updateDocument, deleteDocument } = useApp()
+    const confirm = useConfirm()
 
   const [typeFilter, setTypeFilter] = useState('All')
   const [modalOpen, setModalOpen] = useState(false)
@@ -91,8 +85,9 @@ export default function Documents() {
     closeModal()
   }
 
-  const handleDelete = (doc) => {
-    if (window.confirm(`Delete ${doc.type} (${doc.holder})?`)) deleteDocument(doc.id)
+    const handleDelete = async (doc) => {
+    const ok = await confirm({ title: 'Delete document', message: `Delete ${doc.type} (${doc.holder})? This cannot be undone.` })
+    if (ok) deleteDocument(doc.id)
   }
 
   return (

@@ -785,3 +785,102 @@
     padding: 4px;
   }
 }
+
+/* ===== Polish (added in Phase 9) ===== */
+
+/* Clear outline for keyboard users (only appears when tabbing, not on mouse clicks) */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.modal:focus {
+  outline: none;
+}
+
+.btn-danger-fill {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+.btn-danger-fill:hover {
+  background: #b91c1c;
+}
+
+.confirm-text {
+  color: var(--text-muted);
+}
+
+.sidebar-footer {
+  margin-top: auto; /* pushes the button to the bottom of the sidebar */
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-footer button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.sidebar-footer button:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.error-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+/* Small phones */
+@media (max-width: 560px) {
+  .page {
+    padding: 16px 12px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-header .btn-primary {
+    justify-content: center;
+  }
+
+  .cal-title {
+    min-width: 0;
+    font-size: 1rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px 12px;
+  }
+
+  .toolbar-filters {
+    width: 100%;
+  }
+
+  .toolbar-filters .filter-select {
+    flex: 1;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .reminder-actions {
+    width: 100%;
+  }
+}

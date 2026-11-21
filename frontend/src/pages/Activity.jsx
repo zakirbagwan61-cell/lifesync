@@ -4,18 +4,25 @@ import { useApp } from '../context/AppContext'
 import PageHeader from '../components/common/PageHeader'
 import EmptyState from '../components/common/EmptyState'
 import { KIND_ICONS, KIND_TONES, describeActivity, formatDateTime } from '../utils/display'
+import { useConfirm } from '../context/ConfirmContext'
 
 const TYPES = ['bill', 'document', 'subscription', 'task', 'appointment']
 
 export default function Activity() {
   const { activity, clearActivity } = useApp()
+  const confirm = useConfirm()
   const [typeFilter, setTypeFilter] = useState('All')
 
   // The log is already newest-first; we only filter it.
   const visible = activity.filter((e) => typeFilter === 'All' || e.type === typeFilter)
 
-  const handleClear = () => {
-    if (window.confirm('Clear all activity history? This cannot be undone.')) clearActivity()
+    const handleClear = async () => {
+    const ok = await confirm({
+      title: 'Clear history',
+      message: 'Clear all activity history? This cannot be undone.',
+      confirmLabel: 'Clear',
+    })
+    if (ok) clearActivity()
   }
 
   return (

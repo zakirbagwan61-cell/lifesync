@@ -255,6 +255,20 @@ export function AppProvider({ children }) {
     logActivity('appointment', appt.completed ? 'reopened' : 'completed', appt.title)
   }
 
+
+
+  // ----- Reset -----
+  // Put the original sample data back everywhere and empty the log and snoozes.
+  const resetAllData = () => {
+    setBills(createSeedBills())
+    setDocuments(createSeedDocuments())
+    setSubscriptions(createSeedSubscriptions())
+    setTasks(createSeedTasks())
+    setAppointments(createSeedAppointments())
+    setActivity([])
+    setSnoozes({})
+  }
+
   const value = {
     userName,
     setUserName,
@@ -287,6 +301,7 @@ export function AppProvider({ children }) {
     snoozes,
     snoozeReminder,
     unsnoozeReminder,
+    resetAllData,
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

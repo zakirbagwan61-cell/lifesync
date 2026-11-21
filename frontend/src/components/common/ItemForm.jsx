@@ -72,7 +72,12 @@ export default function ItemForm({
   }
 
   const renderInput = (f) => {
-    const common = { id: f.name, name: f.name, onChange: (e) => handleChange(f, e) }
+        const common = {
+      id: f.name,
+      name: f.name,
+      onChange: (e) => handleChange(f, e),
+      'aria-invalid': errors[f.name] ? 'true' : undefined, // tells screen readers the field has an error
+    }
 
     if (f.type === 'select') {
       return (
@@ -121,7 +126,7 @@ export default function ItemForm({
               {renderInput(f)}
             </>
           )}
-          {errors[f.name] && <div className="form-error">{errors[f.name]}</div>}
+          {errors[f.name] && <div className="form-error" role="alert">{errors[f.name]}</div>}
         </div>
       ))}
 

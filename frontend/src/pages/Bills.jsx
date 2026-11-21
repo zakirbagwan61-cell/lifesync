@@ -9,16 +9,8 @@ import Modal from '../components/common/Modal'
 import ItemForm from '../components/common/ItemForm'
 import { formatCurrency, formatDate, daysUntil } from '../utils/helpers'
 
-const CATEGORIES = ['Electricity', 'Mobile', 'Internet', 'Rent', 'Other']
-
-// Fields for the shared ItemForm.
-const billFields = [
-  { name: 'title', label: 'Bill name', type: 'text', required: true, placeholder: 'e.g. Electricity bill' },
-  { name: 'category', label: 'Category', type: 'select', options: CATEGORIES, required: true },
-  { name: 'amount', label: 'Amount (₹)', type: 'number', required: true },
-  { name: 'dueDate', label: 'Due date', type: 'date', required: true },
-  { name: 'recurring', label: 'Repeats every month', type: 'checkbox' },
-]
+import { CATEGORIES, billFields } from '../utils/fields'
+import { useConfirm } from '../context/ConfirmContext'
 
 // Work out which badge a bill should show.
 function getStatus(bill) {
@@ -31,6 +23,7 @@ function getStatus(bill) {
 
 export default function Bills() {
   const { bills, addBill, updateBill, deleteBill, markBillPaid } = useApp()
+    const confirm = useConfirm()
 
   const [tab, setTab] = useState('upcoming') // 'upcoming' | 'history'
   const [category, setCategory] = useState('All')
@@ -69,9 +62,14 @@ export default function Bills() {
     closeModal()
   }
 
-  const handleDelete = (bill) => {
-    if (window.confirm(`Delete "${bill.title}"?`)) deleteBill(bill.id)
-  }
+  const handleDelete = async (bill) => {
+  const ok = await confirm({
+    title: 'Delete bill',
+    message: `Delete "${bill.title}"? This cannot be undone.`
+  })
+
+  if (ok) deleteBill(bill.id)
+}
 
   return (
     <>
