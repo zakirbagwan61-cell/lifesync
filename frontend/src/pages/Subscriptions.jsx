@@ -88,8 +88,8 @@ export default function Subscriptions() {
 
       <div className="stat-grid">
         <StatCard label="Active subscriptions" value={subscriptions.length} icon={Layers} tone="primary" />
-        <StatCard label="Total per month" value={formatCurrency(Math.round(perMonthTotal))} icon={IndianRupee} tone="primary" />
-        <StatCard label="Total per year" value={formatCurrency(Math.round(perYearTotal))} icon={Repeat} tone="primary" />
+        <StatCard label="Total per month" value={Math.round(perMonthTotal)} format={formatCurrency} icon={IndianRupee} tone="primary" />
+        <StatCard label="Total per year" value={Math.round(perYearTotal)} format={formatCurrency} icon={Repeat} tone="primary" />
         <StatCard label={`Renewing in ${SOON_DAYS} days`} value={renewingSoon} icon={CalendarClock} tone="warning" />
       </div>
 

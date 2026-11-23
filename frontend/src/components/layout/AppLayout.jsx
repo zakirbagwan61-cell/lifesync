@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
 import QuickAdd from './QuickAdd'
 
 // The shell shown on every page: sidebar + topbar, and the current page inside <Outlet />.
 export default function AppLayout() {
+  const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false) // only matters on mobile
   const [quickAddOpen, setQuickAddOpen] = useState(false)
 
@@ -18,7 +19,10 @@ export default function AppLayout() {
           onQuickAdd={() => setQuickAddOpen(true)}
         />
         <main className="page">
-          <Outlet />
+          {/* Keyed by route so each page fades in gently when you navigate */}
+          <div className="page-content" key={location.pathname}>
+            <Outlet />
+          </div>
         </main>
       </div>
 

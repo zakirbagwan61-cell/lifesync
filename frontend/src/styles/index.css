@@ -84,6 +84,24 @@
   /* Type */
   --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --ease: 160ms ease;
+  --ease-out: cubic-bezier(0.22, 0.8, 0.28, 1);
+
+  /* Gradients (same Teal + Deep Navy identity; used selectively, never on inputs or page backgrounds)
+     - primary: decorative accents only (white text on #0D9488 is 3.7:1, so no text sits on it)
+     - action: for surfaces that carry text; starts at the AA-safe teal used by primary buttons
+     - soft: selected states and small accent areas */
+  --gradient-primary: linear-gradient(135deg, #0d9488 0%, #12343b 100%);
+  --gradient-action: linear-gradient(135deg, #0f766e 0%, #12343b 100%);
+  --gradient-soft: linear-gradient(135deg, #e6fffb 0%, #ccfbf1 100%);
+  --gradient-cta: var(--gradient-action);
+  --gradient-cta-hover: linear-gradient(135deg, #115e59 0%, #0e2a30 100%);
+  --feature-text: #ffffff; /* text on the featured (gradient) stat card */
+  --feature-muted: rgba(255, 255, 255, 0.86);
+  --feature-border: transparent;
+  --badge-text: #ffffff;
+
+  /* Hover lift shadow for cards */
+  --shadow-lift: 0 10px 26px rgba(18, 52, 59, 0.12);
 }
 
 /* ===== Tokens: dark theme (a designed palette, not an inverted one) ===== */
@@ -133,6 +151,18 @@
   --shadow-md: none;
   --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.5);
   --overlay: rgba(3, 10, 12, 0.65);
+
+  --gradient-primary: linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%);
+  --gradient-action: linear-gradient(135deg, #122326 0%, #183034 100%);
+  --gradient-soft: linear-gradient(135deg, #123f3c 0%, #183034 100%);
+  --gradient-cta: linear-gradient(135deg, #5eead4 0%, #2dd4bf 100%); /* dark text stays AA-readable */
+  --gradient-cta-hover: linear-gradient(135deg, #99f6e4 0%, #5eead4 100%);
+  --feature-text: #e6f4f2;
+  --feature-muted: #b8ccca;
+  --feature-border: #2f5f62;
+  --badge-text: #3b0a0a; /* dark text on the light red badge: 6.2:1 (white was 2.8:1) */
+
+  --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.4);
 }
 
 /* ===== Reset ===== */
@@ -260,8 +290,8 @@ h4 {
   display: grid;
   place-items: center;
   border-radius: var(--radius-md);
-  background: var(--primary);
-  color: var(--on-primary);
+  background: var(--gradient-primary);
+  color: #ffffff;
 }
 
 .brand-name {
@@ -330,7 +360,7 @@ h4 {
 
 /* Active page: soft teal background plus a teal bar on the left */
 .nav-link.active {
-  background: var(--primary-soft);
+  background: var(--gradient-soft);
   color: var(--primary-text);
   font-weight: 600;
 }
@@ -485,12 +515,74 @@ h4 {
   place-items: center;
   border-radius: 999px;
   background: var(--danger);
-  color: #fff;
+  color: var(--badge-text);
   font-size: 11px;
   font-weight: 700;
   line-height: 1;
   border: 2px solid var(--sidebar-bg);
   box-sizing: content-box;
+  animation: badge-pop 360ms var(--ease-out) both;
+}
+
+@keyframes badge-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Quick Add: the one primary button that carries the brand gradient */
+.topbar .btn-primary {
+  background: var(--gradient-cta);
+  border-color: transparent;
+  transition:
+    box-shadow var(--ease),
+    transform 80ms ease,
+    filter var(--ease);
+}
+
+.topbar .btn-primary:hover {
+  background: var(--gradient-cta-hover);
+  box-shadow: var(--shadow-md);
+}
+
+:root[data-theme='dark'] .topbar .btn-primary:hover {
+  box-shadow: 0 0 0 3px var(--primary-ring);
+}
+
+/* Page content: a short fade and rise whenever you navigate (opacity + transform only) */
+.page-content {
+  animation: page-in 260ms var(--ease-out) both;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Visually hidden, still read by screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* ===== Responsive ===== */

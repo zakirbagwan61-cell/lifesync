@@ -100,9 +100,17 @@ export default function Dashboard() {
       />
 
       <div className="stat-grid">
-        <StatCard label="Pending bills" value={unpaidBills.length} icon={Clock} tone="warning" />
+        <StatCard
+          label="Pending bills"
+          value={unpaidBills.length}
+          icon={Clock}
+          tone="warning"
+          featured
+          progress={bills.length ? (paidCount / bills.length) * 100 : 0}
+          caption={`${paidCount} of ${bills.length} bills paid`}
+        />
         <StatCard label="Completed bills" value={paidCount} icon={CheckCircle} tone="success" />
-        <StatCard label="Subscriptions / month" value={formatCurrency(Math.round(perMonth))} icon={IndianRupee} tone="primary" />
+        <StatCard label="Subscriptions / month" value={Math.round(perMonth)} format={formatCurrency} icon={IndianRupee} tone="primary" />
         <StatCard label="Document alerts" value={expiryAlerts.length} icon={AlertTriangle} tone="danger" />
       </div>
 

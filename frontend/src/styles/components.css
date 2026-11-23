@@ -210,11 +210,28 @@
 
 .stat-card,
 .doc-card {
-  transition: border-color var(--ease), box-shadow var(--ease);
+  transition:
+    transform 220ms var(--ease-out),
+    border-color 200ms ease,
+    box-shadow 220ms ease;
 }
 
-.stat-card:hover,
-.doc-card:hover {
+/* Hover lift only on devices that really hover (not on touch screens) */
+@media (hover: hover) {
+  .stat-card:hover,
+  .doc-card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+    box-shadow: var(--shadow-lift);
+  }
+}
+
+/* Panels hold lists and links, so they only get a calm border change */
+.panel {
+  transition: border-color 200ms ease, box-shadow 220ms ease;
+}
+
+.panel:hover {
   border-color: var(--border-strong);
   box-shadow: var(--shadow-md);
 }
@@ -262,8 +279,97 @@
   color: var(--text-muted);
 }
 
+.stat-body {
+  min-width: 0;
+  flex: 1;
+}
+
+/* Featured stat card: brand gradient (text colors come from the --feature-* tokens) */
+.stat-card.featured {
+  position: relative;
+  overflow: hidden;
+  background: var(--gradient-action);
+  border-color: var(--feature-border);
+}
+
+/* A soft teal glow in the corner: a small decorative accent */
+.stat-card.featured::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.32) 0%, rgba(45, 212, 191, 0) 70%);
+  pointer-events: none;
+}
+
+.stat-card.featured .stat-value {
+  color: var(--feature-text);
+}
+
+.stat-card.featured .stat-label,
+.stat-card.featured .progress-caption {
+  color: var(--feature-muted);
+}
+
+.stat-card.featured .stat-icon {
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--feature-text);
+}
+
+@media (hover: hover) {
+  .stat-card.featured:hover {
+    border-color: var(--feature-border);
+  }
+}
+
+/* ===== Progress bar: the fill grows with transform (no layout work) ===== */
+.progress-block {
+  margin-top: var(--space-3);
+}
+
+.progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--neutral-soft);
+  overflow: hidden;
+}
+
+.stat-card.featured .progress {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.progress-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background: var(--gradient-primary);
+  transform-origin: left center;
+  transform: scaleX(var(--p, 0));
+  transition: transform 700ms var(--ease-out);
+  animation: progress-grow 900ms var(--ease-out) both;
+}
+
+.stat-card.featured .progress-fill {
+  background: linear-gradient(90deg, #5eead4, #2dd4bf);
+}
+
+.progress-caption {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+@keyframes progress-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
 /* ===== Tones: soft background + readable text (icons and badges) ===== */
-.tone-primary { background: var(--primary-soft); color: var(--primary-text); }
+.tone-primary { background: var(--gradient-soft); color: var(--primary-text); }
 .tone-success { background: var(--success-soft); color: var(--success-text); }
 .tone-warning { background: var(--warning-soft); color: var(--warning-text); }
 .tone-danger  { background: var(--danger-soft);  color: var(--danger-text); }
@@ -319,7 +425,7 @@ button.badge:hover {
   padding: 14px;
   margin-bottom: var(--space-3);
   border-radius: var(--radius);
-  background: var(--primary-soft);
+  background: var(--gradient-soft);
   color: var(--primary-text);
 }
 
@@ -892,11 +998,16 @@ button.badge:hover {
   font: inherit;
   color: var(--text);
   text-align: left;
-  transition: background-color var(--ease);
+  transition: background-color var(--ease), box-shadow 220ms ease, transform 80ms ease;
 }
 
 .cal-day:hover {
   background: var(--surface-hover);
+}
+
+.cal-day:active,
+.week-col:active {
+  transform: scale(0.985);
 }
 
 .cal-day.other-month {
@@ -904,9 +1015,18 @@ button.badge:hover {
   color: var(--text-muted);
 }
 
+/* Selected day: an inset ring (animatable, unlike outline) over a soft gradient */
 .cal-day.selected {
-  outline: 2px solid var(--primary);
-  outline-offset: -2px;
+  background: var(--gradient-soft);
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+.cal-day-num {
+  transition: background-color 220ms ease, color 220ms ease, transform 220ms var(--ease-out);
+}
+
+.cal-day.selected .cal-day-num {
+  transform: scale(1.08);
 }
 
 .cal-day-num {
@@ -957,7 +1077,11 @@ button.badge:hover {
   font: inherit;
   color: var(--text);
   text-align: left;
-  transition: border-color var(--ease), background-color var(--ease);
+  transition:
+    border-color 200ms ease,
+    background-color var(--ease),
+    box-shadow 220ms ease,
+    transform 80ms ease;
 }
 
 .week-col:hover {
@@ -969,8 +1093,8 @@ button.badge:hover {
 }
 
 .week-col.selected {
-  outline: 2px solid var(--primary);
-  outline-offset: -2px;
+  background: var(--gradient-soft);
+  box-shadow: inset 0 0 0 2px var(--primary);
 }
 
 .week-head {
@@ -1011,7 +1135,7 @@ button.badge:hover {
   place-items: center;
   padding: var(--space-4);
   z-index: 50;
-  animation: fade-in 0.15s ease;
+  animation: fade-in 0.2s ease both;
 }
 
 .modal {
@@ -1023,7 +1147,7 @@ button.badge:hover {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: var(--shadow-lg);
-  animation: modal-in 0.18s ease;
+  animation: modal-in 0.26s var(--ease-out) both;
 }
 
 .modal:focus {
@@ -1059,7 +1183,7 @@ button.badge:hover {
 @keyframes modal-in {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.98);
+    transform: translateY(12px) scale(0.97);
   }
   to {
     opacity: 1;
@@ -1225,5 +1349,17 @@ button.badge:hover {
 
   .list-row {
     flex-wrap: wrap;
+  }
+}
+
+/* Reduced motion: no lift or press movement (the global rule in index.css also zeroes durations) */
+@media (prefers-reduced-motion: reduce) {
+  .stat-card:hover,
+  .doc-card:hover,
+  .cal-day:active,
+  .week-col:active,
+  .btn-primary:active,
+  .cal-day.selected .cal-day-num {
+    transform: none;
   }
 }

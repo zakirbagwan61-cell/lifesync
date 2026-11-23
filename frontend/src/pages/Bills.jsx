@@ -87,7 +87,7 @@ export default function Bills() {
         <StatCard label="Pending bills" value={unpaid.length} icon={Clock} tone="warning" />
         <StatCard label="Overdue" value={overdueCount} icon={AlertTriangle} tone="danger" />
         <StatCard label="Paid bills" value={paidCount} icon={CheckCircle} tone="success" />
-        <StatCard label="Amount pending" value={formatCurrency(pendingTotal)} icon={IndianRupee} tone="primary" />
+        <StatCard label="Amount pending" value={Number(pendingTotal) || 0} format={formatCurrency} icon={IndianRupee} tone="primary" />
       </div>
 
       {/* Tabs + category filter */}
