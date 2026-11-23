@@ -53,57 +53,57 @@ Files are created only in the phase that needs them.
 
 ## Phase 3: Bills & Payments
 **Goal:** the first full module.
-- [ ] Bills context state and CRUD actions
-- [ ] Bills page: list, add, edit and delete modals
-- [ ] Categories: electricity, mobile, internet, rent, other
-- [ ] Mark paid, which moves the bill into payment history
-- [ ] Monthly recurring bills: marking paid creates next month's bill
-- [ ] Filters by status and category
-- [ ] Seed sample data on first load
+- [x] Bills context state and CRUD actions
+- [x] Bills page: list, add, edit and delete modals
+- [x] Categories: electricity, mobile, internet, rent, other
+- [x] Mark paid, which moves the bill into payment history
+- [x] Monthly recurring bills: marking paid creates next month's bill
+- [x] Filters by status and category
+- [x] Seed sample data on first load
 
 **Done when:** bills persist after refresh and the recurring flow works.
 
 ## Phase 4: Documents Manager
-- [ ] Documents state and CRUD
-- [ ] Types: Aadhaar, PAN, Passport, Driving Licence, Insurance, Other
-- [ ] Fields: number, issue date, expiry date, notes
-- [ ] Expiry status: valid, expiring within 60 days, expired
-- [ ] Card grid layout and expiry alert banner
+- [x] Documents state and CRUD
+- [x] Types: Aadhaar, PAN, Passport, Driving Licence, Insurance, Other
+- [x] Fields: number, issue date, expiry date, notes
+- [x] Expiry status: valid, expiring within 60 days, expired
+- [x] Card grid layout and expiry alert banner
 
 ## Phase 5: Subscriptions
-- [ ] Subscriptions state and CRUD
-- [ ] Fields: name, cost, monthly or yearly cycle, next renewal date, auto-renew toggle
-- [ ] Totals: monthly spend, yearly spend, normalized per-month cost
-- [ ] Renewal-soon indicator
+- [x] Subscriptions state and CRUD
+- [x] Fields: name, cost, monthly or yearly cycle, next renewal date, auto-renew toggle
+- [x] Totals: monthly spend, yearly spend, normalized per-month cost
+- [x] Renewal-soon indicator
 
 ## Phase 6: Tasks & Appointments
-- [ ] Tasks: title, priority, deadline, complete toggle
-- [ ] Appointments: title, date, time, location
-- [ ] Tabs for Tasks and Appointments, with pending and completed counts
-- [ ] Sort and filter by priority and date
+- [x] Tasks: title, priority, deadline, complete toggle
+- [x] Appointments: title, date, time, location
+- [x] Tabs for Tasks and Appointments, with pending and completed counts
+- [x] Sort and filter by priority and date
 
 ## Phase 7: Dashboard, Reminders, Activity
 **Goal:** connect all modules.
-- [ ] Activity log: every add, edit, delete, payment and completion is recorded from context actions
-- [ ] Activity page with type filter and clear history
-- [ ] Reminders derived from bills, documents, subscriptions and appointments
-- [ ] Reminders tabs (Upcoming, Overdue, Completed, Snoozed), plus snooze for 1 day or 1 week
-- [ ] Dashboard: stat cards, upcoming payments, expiry alerts, today's tasks, recent activity
-- [ ] Unified timeline (next 30 days)
+- [x] Activity log: every add, edit, delete, payment and completion is recorded from context actions
+- [x] Activity page with type filter and clear history
+- [x] Reminders derived from bills, documents, subscriptions and appointments
+- [x] Reminders tabs (Upcoming, Overdue, Completed, Snoozed), plus snooze for 1 day or 1 week
+- [x] Dashboard: stat cards, upcoming payments, expiry alerts, today's tasks, recent activity
+- [x] Unified timeline (next 30 days)
 
 ## Phase 8: Calendar, Search, Quick Add
-- [ ] Calendar month and week views, colored event dots by type
-- [ ] Day click shows that day's events
-- [ ] Global search in the topbar and a Search results page with type filter
-- [ ] Quick Add modal in the topbar (choose a type, then a short form)
-- [ ] Smart priority indicators used consistently across the app
+- [x] Calendar month and week views, colored event dots by type
+- [x] Day click shows that day's events
+- [x] Global search in the topbar and a Search results page with type filter
+- [x] Quick Add modal in the topbar (choose a type, then a short form)
+- [x] Smart priority indicators used consistently across the app
 
 ## Phase 9: Polish & hardening
-- [ ] Full responsive pass (desktop, tablet, mobile)
-- [ ] Empty, loading and error states
-- [ ] Accessibility (labels, focus, keyboard-closable modals)
-- [ ] Beginner-friendly code comments on key logic
-- [ ] "Reset demo data" option, README
+- [x] Full responsive pass (desktop, tablet, mobile)
+- [x] Empty, loading and error states
+- [x] Accessibility (labels, focus, keyboard-closable modals)
+- [x] Beginner-friendly code comments on key logic
+- [x] "Reset demo data" option, README
 
 ## Phase 10: Backend integration (after backend Phase 2+)
 - [ ] `src/api/` client (fetch wrapper with auth token)
@@ -120,11 +120,11 @@ Files are created only in the phase that needs them.
 |---|---|---|
 | 1 | Foundation | Done |
 | 2 | Shared UI | Done |
-| 3 | Bills | Not started |
-| 4 | Documents | Not started |
-| 5 | Subscriptions | Not started |
-| 6 | Tasks & Appointments | Not started |
-| 7 | Dashboard, Reminders, Activity | Not started |
-| 8 | Calendar, Search, Quick Add | Not started |
-| 9 | Polish | Not started |
+| 3 | Bills | Done |
+| 4 | Documents | Done |
+| 5 | Subscriptions | Done |
+| 6 | Tasks & Appointments | Done |
+| 7 | Dashboard, Reminders, Activity | Done |
+| 8 | Calendar, Search, Quick Add | Done |
+| 9 | Polish | Done |
 | 10 | Backend integration | Not started |
