@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext'
 import PageHeader from '../components/common/PageHeader'
 import StatCard from '../components/common/StatCard'
 import StatusBadge from '../components/common/StatusBadge'
+import DashboardCharts from '../components/charts/DashboardCharts'
 import { formatCurrency, formatDate, daysUntil, todayString } from '../utils/helpers'
 import { buildReminders, groupReminders } from '../utils/reminders'
 import {
@@ -113,6 +114,8 @@ export default function Dashboard() {
         <StatCard label="Subscriptions / month" value={Math.round(perMonth)} format={formatCurrency} icon={IndianRupee} tone="primary" />
         <StatCard label="Document alerts" value={expiryAlerts.length} icon={AlertTriangle} tone="danger" />
       </div>
+
+      <DashboardCharts bills={bills} tasks={tasks} />
 
       <div className="dash-grid">
         <Panel title="Upcoming payments" to="/bills">

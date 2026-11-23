@@ -1,0 +1,393 @@
+/* =====================================================================
+   LifeSync charts: layout, SVG styling, tooltips, legends, animations.
+   Colors come from the theme tokens (--chart-1..5 and the semantic colors),
+   so every chart works in light and dark.
+   ===================================================================== */
+
+/* Row layout: 3 columns on desktop, wide charts take two */
+.chart-grid-layout {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.chart-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-wide {
+  grid-column: span 2;
+}
+
+.chart-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.chart-head h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.chart-head .muted {
+  margin-top: 2px;
+}
+
+.chart-note {
+  margin-top: var(--space-2);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Small segmented control (Paid / All bills) */
+.seg {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 2px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.seg button {
+  height: 26px;
+  padding: 0 10px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: background-color var(--ease), color var(--ease);
+}
+
+.seg button:hover {
+  color: var(--text-heading);
+}
+
+.seg button.active {
+  background: var(--gradient-soft);
+  color: var(--primary-text);
+}
+
+/* ===== Empty state inside a chart card ===== */
+.chart-empty {
+  flex: 1;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  text-align: center;
+  color: var(--text-muted);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+}
+
+.chart-empty svg {
+  box-sizing: content-box;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--gradient-soft);
+  color: var(--primary-text);
+}
+
+.chart-empty p {
+  max-width: 260px;
+  font-size: 13px;
+}
+
+/* ===== SVG pieces ===== */
+.chart-box {
+  position: relative;
+  width: 100%;
+}
+
+.chart-box svg {
+  display: block;
+  overflow: visible;
+}
+
+.chart-grid {
+  stroke: var(--border);
+  stroke-dasharray: 3 4;
+}
+
+.chart-tick {
+  fill: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--chart-1);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  animation: chart-line-draw 900ms var(--ease-out) both;
+}
+
+.chart-area {
+  animation: chart-fade 700ms ease 250ms both;
+}
+
+.chart-dot {
+  fill: var(--surface);
+  stroke: var(--chart-1);
+  stroke-width: 2;
+  transition: r 150ms ease;
+  animation: chart-fade 400ms ease both;
+}
+
+.chart-dot.active {
+  fill: var(--chart-1);
+}
+
+.chart-cursor {
+  stroke: var(--border-strong);
+  stroke-dasharray: 3 3;
+}
+
+.chart-band {
+  fill: var(--surface-hover);
+}
+
+.chart-bar {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: chart-bar-grow 600ms var(--ease-out) both;
+}
+
+/* ===== Tooltip (HTML, so it uses the page font and theme) ===== */
+.chart-tooltip {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  transform: translate(-50%, calc(-100% - 12px));
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.chart-tooltip strong {
+  color: var(--text-heading);
+  font-weight: 600;
+}
+
+/* ===== Donut ===== */
+.donut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.donut-ring {
+  position: relative;
+  width: 168px;
+  height: 168px;
+  flex-shrink: 0;
+}
+
+.donut-track {
+  fill: none;
+  stroke: var(--neutral-soft);
+}
+
+.donut-arc {
+  fill: none;
+  cursor: pointer;
+  transition: opacity 180ms ease, stroke-dasharray 400ms ease, stroke-dashoffset 400ms ease;
+  animation: donut-in 800ms var(--ease-out) both;
+}
+
+.donut-arc.dim {
+  opacity: 0.35;
+}
+
+.donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 28px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.donut-center strong {
+  max-width: 100%;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--text-heading);
+  font-variant-numeric: tabular-nums;
+}
+
+.donut-center span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ===== Legend ===== */
+.chart-legend {
+  list-style: none;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chart-legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 5px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  transition: background-color var(--ease);
+}
+
+.chart-legend li.active {
+  background: var(--surface-hover);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 3px;
+}
+
+.legend-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-heading);
+  font-weight: 500;
+}
+
+.legend-value {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.legend-percent {
+  min-width: 36px;
+  text-align: right;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-legend.inline {
+  flex-direction: row;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.chart-legend.inline li {
+  padding: 0;
+}
+
+.chart-legend.inline .legend-label {
+  flex: none;
+  color: var(--text);
+}
+
+/* ===== Entrance animations (CSS only; they play once when a chart first appears) ===== */
+@keyframes chart-line-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes chart-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes chart-bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes donut-in {
+  from {
+    stroke-dasharray: 0 100;
+  }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1100px) {
+  .chart-grid-layout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .chart-wide {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 860px) {
+  .chart-grid-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-wide {
+    grid-column: auto;
+  }
+
+  /* Donut next to its legend when the card is wide enough */
+  .donut {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .donut .chart-legend {
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 560px) {
+  .donut {
+    flex-direction: column;
+  }
+
+  .chart-head {
+    flex-wrap: wrap;
+  }
+}

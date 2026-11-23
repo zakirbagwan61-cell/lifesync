@@ -100,6 +100,13 @@
   --feature-border: transparent;
   --badge-text: #ffffff;
 
+  /* Chart series colors: the teal + navy brand family, with blue and slate as supporting tones */
+  --chart-1: #0d9488;
+  --chart-2: #12343b;
+  --chart-3: #5eead4;
+  --chart-4: #0284c7;
+  --chart-5: #8aa6a8;
+
   /* Hover lift shadow for cards */
   --shadow-lift: 0 10px 26px rgba(18, 52, 59, 0.12);
 }
@@ -163,6 +170,13 @@
   --badge-text: #3b0a0a; /* dark text on the light red badge: 6.2:1 (white was 2.8:1) */
 
   --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.4);
+
+  /* Navy would vanish on dark surfaces, so series 2 becomes sky blue */
+  --chart-1: #2dd4bf;
+  --chart-2: #38bdf8;
+  --chart-3: #99f6e4;
+  --chart-4: #a5b4c8;
+  --chart-5: #5f8386;
 }
 
 /* ===== Reset ===== */

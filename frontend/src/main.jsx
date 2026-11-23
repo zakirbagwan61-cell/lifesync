@@ -7,6 +7,7 @@ import ErrorBoundary from './components/common/ErrorBoundary'
 import App from './App'
 import './styles/index.css'
 import './styles/components.css'
+import './styles/charts.css'
 
 // ErrorBoundary catches crashes, BrowserRouter enables routing,
 // AppProvider shares app data, ConfirmProvider powers the "Are you sure?" popups.
