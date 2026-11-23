@@ -1,0 +1,390 @@
+/* =====================================================================
+   LifeSync Smart Insights: summary cards, upcoming list, recommendations.
+   Uses the same tokens as the rest of the app, so light and dark both work.
+   ===================================================================== */
+
+.insights {
+  margin-bottom: var(--space-6);
+}
+
+.insights-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.insights-head h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.insight-card {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 200ms ease, box-shadow 220ms ease;
+  animation: insight-in 380ms var(--ease-out) both;
+}
+
+.insight-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+/* Cards rise in one after another */
+.insight-grid > :nth-child(2) { animation-delay: 60ms; }
+.insight-grid > :nth-child(3) { animation-delay: 120ms; }
+.insight-grid > :nth-child(4) { animation-delay: 180ms; }
+.insight-grid > :nth-child(5) { animation-delay: 240ms; }
+
+@keyframes insight-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.insight-wide {
+  grid-column: span 2;
+}
+
+.insight-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.insight-top h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.insight-top-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.insight-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+}
+
+.insight-link {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary-text);
+}
+
+.insight-link:hover {
+  text-decoration: underline;
+}
+
+.insight-figure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-heading);
+  font-variant-numeric: tabular-nums;
+}
+
+.insight-figure-note {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-muted);
+}
+
+.insight-text {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.insight-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.insight-empty .ok {
+  color: var(--success);
+}
+
+.insight-foot {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.bad {
+  color: var(--danger-text);
+  font-weight: 600;
+}
+
+/* ===== Featured spending card ===== */
+.insight-card.featured {
+  overflow: hidden;
+  background: var(--gradient-action);
+  border-color: var(--feature-border);
+  color: var(--feature-muted);
+}
+
+.insight-card.featured::after {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.3) 0%, rgba(45, 212, 191, 0) 70%);
+  pointer-events: none;
+}
+
+.insight-card.featured .insight-top h3,
+.insight-card.featured .insight-figure {
+  color: var(--feature-text);
+}
+
+.insight-card.featured .insight-text {
+  color: var(--feature-muted);
+}
+
+.insight-card.featured .insight-icon {
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--feature-text);
+}
+
+.insight-card.featured:hover {
+  border-color: var(--feature-border);
+}
+
+.trend-pill {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--feature-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ===== Productivity ===== */
+.mini-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.mini-stats dt {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.mini-stats dd {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-heading);
+  font-variant-numeric: tabular-nums;
+}
+
+.mini-stats dd.bad {
+  color: var(--danger-text);
+}
+
+/* ===== Financial rows ===== */
+.money-rows {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: auto;
+}
+
+.money-rows li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--border);
+}
+
+.money-label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  color: var(--text-heading);
+}
+
+.money-label small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.money-amount {
+  font-weight: 600;
+  color: var(--text-heading);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== Clickable rows (upcoming + recommendations) ===== */
+.upcoming-list,
+.rec-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 calc(var(--space-2) * -1);
+}
+
+.upcoming-row,
+.rec-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  transition: background-color var(--ease), transform 80ms ease;
+}
+
+.upcoming-row:hover,
+.rec-row:hover {
+  background: var(--surface-hover);
+}
+
+.upcoming-row:active,
+.rec-row:active {
+  transform: scale(0.99);
+}
+
+.rec-row .muted {
+  display: block;
+  white-space: normal;
+}
+
+.upcoming-when {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.upcoming-when .muted {
+  font-weight: 400;
+}
+
+.priority-slot {
+  flex-shrink: 0;
+  min-width: 78px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.row-chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 160ms var(--ease-out), color var(--ease);
+}
+
+.upcoming-row:hover .row-chevron,
+.rec-row:hover .row-chevron {
+  color: var(--primary-text);
+  transform: translateX(3px);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1100px) {
+  .insight-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Two columns: pair Financial with Recommendations, then the wide list underneath */
+  .insight-wide {
+    grid-column: span 2;
+    order: 1;
+  }
+}
+
+@media (max-width: 860px) {
+  .insight-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .insight-wide {
+    grid-column: auto;
+    order: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .insight-card {
+    padding: var(--space-4);
+  }
+
+  .upcoming-row {
+    flex-wrap: wrap;
+  }
+
+  .priority-slot {
+    min-width: 0;
+  }
+
+  .row-chevron {
+    display: none;
+  }
+
+  .insight-figure {
+    font-size: 26px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .upcoming-row:active,
+  .rec-row:active,
+  .upcoming-row:hover .row-chevron,
+  .rec-row:hover .row-chevron {
+    transform: none;
+  }
+}

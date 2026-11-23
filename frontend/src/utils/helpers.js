@@ -12,10 +12,26 @@ export const formatCurrency = (amount) =>
     maximumFractionDigits: 0,
   }).format(Number(amount) || 0)
 
-// Format "2026-11-16" -> "16 Nov 2026"
+// Read a date-only string ("2026-11-16") as a calendar date: { y, m, d } (m is 1 to 12).
+// Returns null for anything that is not a real "YYYY-MM-DD" date.
+// A date-only string has no time zone, so it must never be run through new Date("2026-11-16"),
+// which means "midnight UTC" and shows as the previous day in time zones west of UTC.
+export const parseDateOnly = (dateString) => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateString || '')
+  if (!match) return null
+  const [y, m, d] = match.slice(1).map(Number)
+  const check = new Date(y, m - 1, d)
+  const real = check.getFullYear() === y && check.getMonth() === m - 1 && check.getDate() === d
+  return real ? { y, m, d } : null
+}
+
+// Format "2026-11-16" -> "16 Nov 2026" (the same calendar date in every time zone)
 export const formatDate = (dateString) => {
   if (!dateString) return '-'
-  return new Date(dateString).toLocaleDateString('en-IN', {
+  const parts = parseDateOnly(dateString)
+  // Anything that is not a plain date keeps the previous behaviour
+  const date = parts ? new Date(parts.y, parts.m - 1, parts.d) : new Date(dateString)
+  return date.toLocaleDateString('en-IN', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -34,9 +50,13 @@ export const todayString = () => {
 // Negative = already passed (overdue), 0 = today, positive = upcoming.
 export const daysUntil = (dateString) => {
   if (!dateString) return null
-  const target = new Date(dateString)
-  const today = new Date(todayString())
-  return Math.round((target - today) / (1000 * 60 * 60 * 24))
+  const DAY = 1000 * 60 * 60 * 24
+  // Count whole calendar days using UTC day numbers, so time zones and daylight saving never matter
+  const dayNumber = (str) => {
+    const p = parseDateOnly(str)
+    return p ? Date.UTC(p.y, p.m - 1, p.d) : new Date(str).getTime()
+  }
+  return Math.round((dayNumber(dateString) - dayNumber(todayString())) / DAY)
 }
 
 export const isOverdue = (dateString) => {
