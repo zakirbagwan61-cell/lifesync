@@ -12,10 +12,10 @@ const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 // Dot / chip color for each kind of event.
 const KIND_COLORS = {
   bill: 'var(--warning)',
-  document: '#a855f7',
-  subscription: '#6b7280',
+  document: 'var(--primary)',
+  subscription: 'var(--text-muted)',
   task: 'var(--success)',
-  appointment: '#0ea5e9',
+  appointment: 'var(--info)',
 }
 const KIND_NAMES = {
   bill: 'Bills',

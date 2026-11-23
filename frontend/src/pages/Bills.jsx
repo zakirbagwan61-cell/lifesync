@@ -142,10 +142,10 @@ export default function Bills() {
                     <strong>{bill.title}</strong>
                     {bill.recurring && <div className="muted">Repeats monthly</div>}
                   </td>
-                  <td>{bill.category}</td>
-                  <td>{formatCurrency(bill.amount)}</td>
-                  <td>{formatDate(tab === 'history' ? bill.paidAt : bill.dueDate)}</td>
-                  <td><StatusBadge status={getStatus(bill)} /></td>
+                  <td data-label="Category">{bill.category}</td>
+                  <td data-label="Amount">{formatCurrency(bill.amount)}</td>
+                  <td data-label={tab === 'history' ? 'Paid on' : 'Due date'}>{formatDate(tab === 'history' ? bill.paidAt : bill.dueDate)}</td>
+                  <td data-label="Status"><StatusBadge status={getStatus(bill)} /></td>
                   <td>
                     <div className="row-actions">
                       {bill.status !== 'paid' && (

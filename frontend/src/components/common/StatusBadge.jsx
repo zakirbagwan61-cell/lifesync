@@ -3,7 +3,7 @@
 const statuses = {
   overdue: { label: 'Overdue', tone: 'danger' },
   soon: { label: 'Due soon', tone: 'warning' },
-  pending: { label: 'Pending', tone: 'neutral' },
+  pending: { label: 'Pending', tone: 'warning' },
   paid: { label: 'Paid', tone: 'success' },
   completed: { label: 'Completed', tone: 'success' },
   valid: { label: 'Valid', tone: 'success' },

@@ -192,7 +192,7 @@ export default function Tasks() {
                     <td className={item.completed ? 'done-text' : ''}>
                       <strong>{item.title}</strong>
                     </td>
-                    <td>
+                    <td data-label={isTasks ? 'Priority' : 'Location'}>
                       {isTasks ? (
                         <StatusBadge status={item.priority.toLowerCase()} />
                       ) : item.location ? (
@@ -201,7 +201,7 @@ export default function Tasks() {
                         '-'
                       )}
                     </td>
-                    <td>
+                    <td data-label={isTasks ? 'Deadline' : 'Date & time'}>
                       {formatDate(date)}
                       {!isTasks && <span className="muted"> · {formatTime(item.time)}</span>}
                       <div>

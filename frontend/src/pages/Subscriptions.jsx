@@ -88,9 +88,9 @@ export default function Subscriptions() {
 
       <div className="stat-grid">
         <StatCard label="Active subscriptions" value={subscriptions.length} icon={Layers} tone="primary" />
-        <StatCard label="Total per month" value={formatCurrency(Math.round(perMonthTotal))} icon={IndianRupee} tone="success" />
-        <StatCard label="Total per year" value={formatCurrency(Math.round(perYearTotal))} icon={Repeat} tone="warning" />
-        <StatCard label={`Renewing in ${SOON_DAYS} days`} value={renewingSoon} icon={CalendarClock} tone="danger" />
+        <StatCard label="Total per month" value={formatCurrency(Math.round(perMonthTotal))} icon={IndianRupee} tone="primary" />
+        <StatCard label="Total per year" value={formatCurrency(Math.round(perYearTotal))} icon={Repeat} tone="primary" />
+        <StatCard label={`Renewing in ${SOON_DAYS} days`} value={renewingSoon} icon={CalendarClock} tone="warning" />
       </div>
 
       <div className="toolbar">
@@ -131,20 +131,20 @@ export default function Subscriptions() {
                 return (
                   <tr key={sub.id}>
                     <td><strong>{sub.name}</strong></td>
-                    <td>
+                    <td data-label="Cost">
                       {formatCurrency(sub.cost)}
                       <span className="muted"> / {sub.cycle === 'Yearly' ? 'year' : 'month'}</span>
                       {sub.cycle === 'Yearly' && (
                         <div className="muted">≈ {formatCurrency(Math.round(monthlyCost(sub)))} / month</div>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Next renewal">
                       {formatDate(sub.nextRenewal)}
                       <div>
                         <span className={`badge tone-${renewal.tone}`}>{renewal.text}</span>
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Auto-renew">
                       {/* Click the badge to switch auto-renew on or off */}
                       <button
                         className={`badge tone-${sub.autoRenew ? 'success' : 'neutral'}`}

@@ -11,11 +11,11 @@ export const KIND_ICONS = {
 }
 
 export const KIND_TONES = {
-  bill: 'warning',
+  bill: 'primary',
   document: 'primary',
   subscription: 'neutral',
-  task: 'success',
-  appointment: 'primary',
+  task: 'primary',
+  appointment: 'info',
 }
 
 const ACTION_TEXT = {

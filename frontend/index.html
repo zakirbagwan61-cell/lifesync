@@ -1,10 +1,27 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="LifeSync - One place for everything that matters." />
     <title>LifeSync</title>
+
+    <!-- Apply the saved theme before the page paints, so there is no flash of the wrong theme. -->
+    <script>
+      try {
+        var saved = localStorage.getItem('lifesync-theme')
+        document.documentElement.setAttribute('data-theme', saved === 'dark' ? 'dark' : 'light')
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light')
+      }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div id="root"></div>
