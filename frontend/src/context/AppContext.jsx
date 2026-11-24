@@ -3,6 +3,7 @@ import useLocalStorage from '../hooks/useLocalStorage'
 import { generateId, todayString, addDays, addMonths } from '../utils/helpers'
 import { reopenBillInList } from '../utils/bills'
 import { isPlainObject, isRecordList, isText } from '../utils/storage'
+import { MAX_ACTIVITY } from '../utils/activity'
 
 // Context = one shared store that every page can read from.
 // Phase 3 added bills, 4 documents, 5 subscriptions, 6 tasks + appointments,
@@ -84,10 +85,11 @@ export function AppProvider({ children }) {
   // ----- Activity log -----
   // type: bill | document | subscription | task | appointment
   // action: added | updated | deleted | paid | completed | reopened | renewed
-  // Newest entry goes first; we keep only the latest 200.
-  const logActivity = (type, action, title) =>
+  // Newest entry goes first; we keep only the latest MAX_ACTIVITY. `itemId` is the item the entry is
+  // about, so the Activity page can link to it (older entries saved before this have none).
+  const logActivity = (type, action, title, itemId) =>
     setActivity((prev) =>
-      [{ id: generateId(), type, action, title, timestamp: new Date().toISOString() }, ...prev].slice(0, 200)
+      [{ id: generateId(), type, action, title, itemId, timestamp: new Date().toISOString() }, ...prev].slice(0, MAX_ACTIVITY)
     )
 
   const clearActivity = () => setActivity([])
@@ -108,20 +110,21 @@ export function AppProvider({ children }) {
   // Each action changes the list with setBills(prev => ...) and then logs what happened.
 
   const addBill = (data) => {
-    setBills((prev) => [...prev, { ...data, id: generateId(), status: 'pending', paidAt: null }])
-    logActivity('bill', 'added', data.title)
+    const id = generateId()
+    setBills((prev) => [...prev, { ...data, id, status: 'pending', paidAt: null }])
+    logActivity('bill', 'added', data.title, id)
   }
 
   const updateBill = (id, changes) => {
     const bill = bills.find((b) => b.id === id)
     setBills((prev) => prev.map((b) => (b.id === id ? { ...b, ...changes } : b)))
-    logActivity('bill', 'updated', changes.title || bill?.title || 'Bill')
+    logActivity('bill', 'updated', changes.title || bill?.title || 'Bill', id)
   }
 
   const deleteBill = (id) => {
     const bill = bills.find((b) => b.id === id)
     setBills((prev) => prev.filter((b) => b.id !== id))
-    logActivity('bill', 'deleted', bill?.title || 'Bill')
+    logActivity('bill', 'deleted', bill?.title || 'Bill', id)
   }
 
   // Mark a bill paid. If it repeats monthly, also create next month's bill.
@@ -148,7 +151,7 @@ export function AppProvider({ children }) {
       }
       return updated
     })
-    logActivity('bill', 'paid', bill.title)
+    logActivity('bill', 'paid', bill.title, id)
   }
 
   // Turn a paid bill back into a pending one ("Undo" after paying, or "Reopen" in payment history).
@@ -158,43 +161,45 @@ export function AppProvider({ children }) {
   const reopenBill = (id) => {
     const bill = bills.find((b) => b.id === id)
     setBills((prev) => reopenBillInList(prev, id))
-    logActivity('bill', 'reopened', bill?.title || 'Bill')
+    logActivity('bill', 'reopened', bill?.title || 'Bill', id)
   }
 
   // ----- Document actions -----
   const addDocument = (data) => {
-    setDocuments((prev) => [...prev, { ...data, id: generateId() }])
-    logActivity('document', 'added', docLabel(data))
+    const id = generateId()
+    setDocuments((prev) => [...prev, { ...data, id }])
+    logActivity('document', 'added', docLabel(data), id)
   }
 
   const updateDocument = (id, changes) => {
     const doc = documents.find((d) => d.id === id)
     setDocuments((prev) => prev.map((d) => (d.id === id ? { ...d, ...changes } : d)))
-    logActivity('document', 'updated', docLabel(doc ? { ...doc, ...changes } : changes))
+    logActivity('document', 'updated', docLabel(doc ? { ...doc, ...changes } : changes), id)
   }
 
   const deleteDocument = (id) => {
     const doc = documents.find((d) => d.id === id)
     setDocuments((prev) => prev.filter((d) => d.id !== id))
-    logActivity('document', 'deleted', docLabel(doc))
+    logActivity('document', 'deleted', docLabel(doc), id)
   }
 
   // ----- Subscription actions -----
   const addSubscription = (data) => {
-    setSubscriptions((prev) => [...prev, { ...data, id: generateId() }])
-    logActivity('subscription', 'added', data.name)
+    const id = generateId()
+    setSubscriptions((prev) => [...prev, { ...data, id }])
+    logActivity('subscription', 'added', data.name, id)
   }
 
   const updateSubscription = (id, changes) => {
     const sub = subscriptions.find((s) => s.id === id)
     setSubscriptions((prev) => prev.map((s) => (s.id === id ? { ...s, ...changes } : s)))
-    logActivity('subscription', 'updated', changes.name || sub?.name || 'Subscription')
+    logActivity('subscription', 'updated', changes.name || sub?.name || 'Subscription', id)
   }
 
   const deleteSubscription = (id) => {
     const sub = subscriptions.find((s) => s.id === id)
     setSubscriptions((prev) => prev.filter((s) => s.id !== id))
-    logActivity('subscription', 'deleted', sub?.name || 'Subscription')
+    logActivity('subscription', 'deleted', sub?.name || 'Subscription', id)
   }
 
   // Mark a subscription as renewed: move the renewal date forward by one billing cycle.
@@ -207,25 +212,26 @@ export function AppProvider({ children }) {
           : s
       )
     )
-    logActivity('subscription', 'renewed', sub?.name || 'Subscription')
+    logActivity('subscription', 'renewed', sub?.name || 'Subscription', id)
   }
 
   // ----- Task actions -----
   const addTask = (data) => {
-    setTasks((prev) => [...prev, { ...data, id: generateId(), completed: false, completedAt: null }])
-    logActivity('task', 'added', data.title)
+    const id = generateId()
+    setTasks((prev) => [...prev, { ...data, id, completed: false, completedAt: null }])
+    logActivity('task', 'added', data.title, id)
   }
 
   const updateTask = (id, changes) => {
     const task = tasks.find((t) => t.id === id)
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...changes } : t)))
-    logActivity('task', 'updated', changes.title || task?.title || 'Task')
+    logActivity('task', 'updated', changes.title || task?.title || 'Task', id)
   }
 
   const deleteTask = (id) => {
     const task = tasks.find((t) => t.id === id)
     setTasks((prev) => prev.filter((t) => t.id !== id))
-    logActivity('task', 'deleted', task?.title || 'Task')
+    logActivity('task', 'deleted', task?.title || 'Task', id)
   }
 
   // Flip a task between pending and completed.
@@ -239,32 +245,33 @@ export function AppProvider({ children }) {
           : t
       )
     )
-    logActivity('task', task.completed ? 'reopened' : 'completed', task.title)
+    logActivity('task', task.completed ? 'reopened' : 'completed', task.title, id)
   }
 
   // ----- Appointment actions -----
   const addAppointment = (data) => {
-    setAppointments((prev) => [...prev, { ...data, id: generateId(), completed: false }])
-    logActivity('appointment', 'added', data.title)
+    const id = generateId()
+    setAppointments((prev) => [...prev, { ...data, id, completed: false }])
+    logActivity('appointment', 'added', data.title, id)
   }
 
   const updateAppointment = (id, changes) => {
     const appt = appointments.find((a) => a.id === id)
     setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, ...changes } : a)))
-    logActivity('appointment', 'updated', changes.title || appt?.title || 'Appointment')
+    logActivity('appointment', 'updated', changes.title || appt?.title || 'Appointment', id)
   }
 
   const deleteAppointment = (id) => {
     const appt = appointments.find((a) => a.id === id)
     setAppointments((prev) => prev.filter((a) => a.id !== id))
-    logActivity('appointment', 'deleted', appt?.title || 'Appointment')
+    logActivity('appointment', 'deleted', appt?.title || 'Appointment', id)
   }
 
   const toggleAppointment = (id) => {
     const appt = appointments.find((a) => a.id === id)
     if (!appt) return
     setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, completed: !a.completed } : a)))
-    logActivity('appointment', appt.completed ? 'reopened' : 'completed', appt.title)
+    logActivity('appointment', appt.completed ? 'reopened' : 'completed', appt.title, id)
   }
 
 

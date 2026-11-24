@@ -1671,3 +1671,16 @@ button.badge:hover {
   margin: calc(var(--space-2) * -1) 0 var(--space-3);
   font-size: 12px;
 }
+
+/* Activity History: one heading per day */
+.activity-group {
+  margin-bottom: var(--space-5);
+}
+
+.activity-day {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
