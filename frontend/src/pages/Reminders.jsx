@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Bell, BellOff } from 'lucide-react'
 import { useApp } from '../context/AppContext'
@@ -9,7 +9,7 @@ import Tabs, { tabPanelProps } from '../components/common/Tabs'
 import { formatDate, todayString } from '../utils/helpers'
 import { buildReminders, groupReminders, leadTimeSummary } from '../utils/reminders'
 import { KIND_ICONS, KIND_TONES, dueStatus, relativeDays } from '../utils/display'
-import { useToast } from '../context/ToastContext'
+import useReminderActions, { DONE_LABEL } from '../hooks/useReminderActions'
 
 const TABS = [
   { key: 'overdue', label: 'Overdue' },
@@ -18,33 +18,9 @@ const TABS = [
   { key: 'completed', label: 'Completed' },
 ]
 
-// Text of the main action button for each kind of reminder.
-const DONE_LABEL = {
-  bill: 'Mark paid',
-  task: 'Mark done',
-  appointment: 'Mark done',
-  subscription: 'Mark renewed',
-}
-
-// What the Undo message says after each action.
-const DONE_MESSAGE = {
-  bill: 'marked as paid',
-  task: 'marked as done',
-  appointment: 'marked as done',
-  subscription: 'marked as renewed',
-}
-
 export default function Reminders() {
-  const {
-    bills, documents, subscriptions, tasks, appointments, snoozes,
-    snoozeReminder, unsnoozeReminder,
-    markBillPaid, reopenBill, toggleTask, toggleAppointment, renewSubscription, updateSubscription,
-  } = useApp()
-  const toast = useToast()
-
-  // An Undo button can be pressed a few seconds later, so it reads the newest functions from here.
-  const latest = useRef({})
-  latest.current = { reopenBill, toggleTask, toggleAppointment, updateSubscription, unsnoozeReminder }
+  const { bills, documents, subscriptions, tasks, appointments, snoozes, unsnoozeReminder } = useApp()
+  const { markDone, snooze } = useReminderActions()
 
   const [tab, setTab] = useState('upcoming')
 
@@ -54,36 +30,6 @@ export default function Reminders() {
     snoozes
   )
   const list = tab === 'completed' ? groups.completed.slice(0, 50) : groups[tab]
-
-  // Run the right action in the right module when the user finishes a reminder.
-  // Every one of these is a single click, so each offers Undo.
-  const markDone = (r) => {
-    let undo
-    if (r.kind === 'bill') {
-      markBillPaid(r.sourceId)
-      undo = () => latest.current.reopenBill(r.sourceId)
-    } else if (r.kind === 'task') {
-      toggleTask(r.sourceId)
-      undo = () => latest.current.toggleTask(r.sourceId) // toggling again puts it back to pending
-    } else if (r.kind === 'appointment') {
-      toggleAppointment(r.sourceId)
-      undo = () => latest.current.toggleAppointment(r.sourceId)
-    } else if (r.kind === 'subscription') {
-      const previousDate = subscriptions.find((s) => s.id === r.sourceId)?.nextRenewal
-      renewSubscription(r.sourceId)
-      undo = () => latest.current.updateSubscription(r.sourceId, { nextRenewal: previousDate })
-    } else return
-    toast({ message: `"${r.title}" ${DONE_MESSAGE[r.kind]}`, onAction: undo })
-  }
-
-  // Snoozing hides a reminder for a while; Undo brings it straight back.
-  const snooze = (r, days) => {
-    snoozeReminder(r.id, days)
-    toast({
-      message: `"${r.title}" snoozed for ${days === 30 ? '1 month' : days === 7 ? '1 week' : `${days} day${days === 1 ? '' : 's'}`}`,
-      onAction: () => latest.current.unsnoozeReminder(r.id),
-    })
-  }
 
   return (
     <>

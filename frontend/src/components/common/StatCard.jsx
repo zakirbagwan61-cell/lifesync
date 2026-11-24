@@ -6,7 +6,7 @@ import useCountUp from '../../hooks/useCountUp'
 // `featured` gives the card the brand gradient; `progress` (0-100) adds a small progress bar.
 //   <StatCard label="Pending bills" value={4} icon={Receipt} tone="warning" />
 export default function StatCard({
-  label, value, icon: Icon, tone = 'primary', format, featured = false, progress, caption,
+  label, value, icon: Icon, tone = 'primary', format, featured = false, progress, caption, sub,
 }) {
   const isNumber = typeof value === 'number'
   const counted = useCountUp(isNumber ? value : 0, label)
@@ -26,6 +26,7 @@ export default function StatCard({
           <div className="stat-value">{value}</div>
         )}
         <div className="stat-label">{label}</div>
+        {sub && <div className="stat-sub">{sub}</div>}
         {progress !== undefined && (
           <div className="progress-block">
             <div

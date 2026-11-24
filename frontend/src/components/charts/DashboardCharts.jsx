@@ -6,15 +6,25 @@ import BarChart from './BarChart'
 import {
   monthWindow, spendingByMonth, spendingByCategory, paymentStatus, tasksByMonth,
 } from './chartUtils'
+import Tabs, { tabPanelProps } from '../common/Tabs'
 import { formatCurrency } from '../../utils/helpers'
+import { financialInsight } from '../../utils/insights'
 
 const CATEGORY_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)']
 
+const TABS = [
+  { key: 'spending', label: 'Spending trend' },
+  { key: 'categories', label: 'Categories' },
+  { key: 'tasks', label: 'Tasks' },
+  { key: 'status', label: 'Bill status' },
+]
+
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`
 
-// The four dashboard charts. Everything is calculated from the bills and tasks passed in
+// The four dashboard charts, shown one at a time in tabs. Everything is calculated from the bills and tasks passed in
 // (they come from Context), so the charts update the moment an item is added, edited or deleted.
 export default function DashboardCharts({ bills, tasks }) {
+  const [tab, setTab] = useState('spending') // not saved: always opens on Spending trend
   const [categoryMode, setCategoryMode] = useState('paid') // 'paid' | 'all'
 
   const spending = useMemo(() => spendingByMonth(bills, monthWindow(5)), [bills])
@@ -48,10 +58,18 @@ export default function DashboardCharts({ bills, tasks }) {
     </div>
   )
 
-  return (
-    <div className="chart-grid-layout">
+  const finance = useMemo(() => financialInsight(bills), [bills])
+  const moneyRows = [
+    { key: 'paid', label: 'Paid', color: 'var(--success)', ...finance.paid },
+    { key: 'pending', label: 'Pending', color: 'var(--warning)', ...finance.pending },
+    { key: 'overdue', label: 'Overdue', color: 'var(--danger)', ...finance.overdue },
+  ]
+
+  let chart
+  if (tab === 'spending') {
+    chart = (
       <ChartCard
-        wide
+        bare
         title="Monthly spending"
         subtitle="Bills paid in the last 6 months"
         empty={spendingTotal === 0}
@@ -68,8 +86,11 @@ export default function DashboardCharts({ bills, tasks }) {
           ariaLabel="Monthly spending on paid bills for the last 6 months"
         />
       </ChartCard>
-
+    )
+  } else if (tab === 'categories') {
+    chart = (
       <ChartCard
+        bare
         title="Expense by category"
         subtitle={categoryMode === 'paid' ? 'Paid bills' : 'All bills, paid and unpaid'}
         action={modeToggle}
@@ -86,9 +107,11 @@ export default function DashboardCharts({ bills, tasks }) {
           ariaLabel={`Expense by category: ${categories.map((c) => `${c.label} ${formatCurrency(c.value)}`).join(', ')}`}
         />
       </ChartCard>
-
+    )
+  } else if (tab === 'tasks') {
+    chart = (
       <ChartCard
-        wide
+        bare
         title="Task completion"
         subtitle="Completed tasks by month done, pending tasks by month due"
         empty={taskPoints === 0}
@@ -100,21 +123,54 @@ export default function DashboardCharts({ bills, tasks }) {
       >
         <BarChart data={taskData.data} ariaLabel="Completed and pending tasks per month" />
       </ChartCard>
-
+    )
+  } else {
+    chart = (
       <ChartCard
+        bare
         title="Payment status"
         subtitle="All bills right now"
         empty={statusTotal === 0}
         emptyText="Add a bill to see how many are paid, pending or overdue."
       >
-        <DonutChart
-          slices={statusSlices}
-          format={(n) => String(n)}
-          centerValue={String(statusTotal)}
-          centerLabel={statusTotal === 1 ? 'Bill' : 'Bills'}
-          ariaLabel={`Payment status: ${status.paid} paid, ${status.pending} pending, ${status.overdue} overdue`}
-        />
+        <div className="status-tab">
+          <DonutChart
+            slices={statusSlices}
+            format={(n) => String(n)}
+            centerValue={String(statusTotal)}
+            centerLabel={statusTotal === 1 ? 'Bill' : 'Bills'}
+            ariaLabel={`Payment status: ${status.paid} paid, ${status.pending} pending, ${status.overdue} overdue`}
+          />
+          {/* Amounts for the same three groups (the donut shows counts) */}
+          <div className="status-money">
+            <div className="insight-figure">
+              {formatCurrency(finance.outstanding)}
+              <span className="insight-figure-note">still to pay</span>
+            </div>
+            <ul className="money-rows">
+              {moneyRows.map((r) => (
+                <li key={r.key}>
+                  <span className="legend-dot" style={{ background: r.color }} />
+                  <span className="money-label">{r.label}<small>{plural(r.count, 'bill')}</small></span>
+                  <span className="money-amount">{formatCurrency(r.amount)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </ChartCard>
-    </div>
+    )
+  }
+
+  return (
+    <section className="panel analytics" aria-labelledby="analytics-title">
+      <div className="panel-header analytics-head">
+        <h2 id="analytics-title">Analytics</h2>
+        <div className="scroll-tabs">
+          <Tabs id="analytics-tabs" label="Analytics charts" tabs={TABS} value={tab} onChange={setTab} />
+        </div>
+      </div>
+      <div {...tabPanelProps('analytics-tabs', tab)}>{chart}</div>
+    </section>
   )
 }

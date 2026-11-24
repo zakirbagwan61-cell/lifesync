@@ -1,15 +1,18 @@
 import { Link } from 'react-router-dom'
-import { Clock, CheckCircle, IndianRupee, AlertTriangle } from 'lucide-react'
+import { Clock, CheckSquare, IndianRupee, AlertTriangle } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import PageHeader from '../components/common/PageHeader'
 import StatCard from '../components/common/StatCard'
 import StatusBadge from '../components/common/StatusBadge'
 import DashboardCharts from '../components/charts/DashboardCharts'
-import SmartInsights from '../components/insights/SmartInsights'
+import NeedsAttention from '../components/dashboard/NeedsAttention'
+import { SpendingCard, ProductivityCard, Recommendations } from '../components/insights/SmartInsights'
 import { formatCurrency, formatDate, daysUntil, todayString } from '../utils/helpers'
-import { buildReminders, groupReminders } from '../utils/reminders'
 import {
-  KIND_ICONS, KIND_TONES, describeActivity, formatDateTime, formatTime, dueStatus, relativeDays,
+  spendingInsight, productivityInsight, financialInsight, buildRecommendations,
+} from '../utils/insights'
+import {
+  KIND_ICONS, KIND_TONES, describeActivity, formatDateTime,
 } from '../utils/display'
 
 // A document shows up in the alerts when it expires within this many days (or already has).
@@ -50,41 +53,35 @@ function Row({ kind, title, meta, date, badge }) {
 
 const Empty = ({ text }) => <p className="muted panel-empty">{text}</p>
 
+
 export default function Dashboard() {
   const { userName, bills, documents, subscriptions, tasks, appointments, activity, snoozes } = useApp()
   const today = todayString()
 
   // ----- Numbers for the stat cards -----
-  const unpaidBills = bills.filter((b) => b.status !== 'paid')
-  const paidCount = bills.length - unpaidBills.length
+  const { outstanding } = financialInsight(bills)
+  const pendingBillCount = bills.filter((b) => b.status !== 'paid').length
   const perMonth = subscriptions.reduce(
     (sum, s) => sum + (s.cycle === 'Yearly' ? s.cost / 12 : s.cost),
     0
   )
+  const pendingTasks = tasks.filter((t) => !t.completed)
+  const tasksToday = pendingTasks.filter((t) => t.deadline === today).length
+  const tasksOverdue = pendingTasks.filter((t) => t.deadline < today).length
 
   // ----- Panel data -----
-  const upcomingPayments = [...unpaidBills]
-    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
-    .slice(0, 5)
-
   const expiryAlerts = documents
     .filter((d) => d.expiryDate && daysUntil(d.expiryDate) <= DOC_ALERT_DAYS)
     .sort((a, b) => a.expiryDate.localeCompare(b.expiryDate))
 
-  // Today: tasks due today (or already overdue) and today's appointments.
-  const todayTasks = tasks.filter((t) => !t.completed && t.deadline <= today)
-  const todayAppointments = appointments
-    .filter((a) => !a.completed && a.date === today)
-    .sort((a, b) => a.time.localeCompare(b.time))
-
   const recentActivity = activity.slice(0, 6)
 
-  // Timeline: everything overdue or coming up soon, from all modules, in date order.
-  const groups = groupReminders(
-    buildReminders({ bills, documents, subscriptions, tasks, appointments }),
-    snoozes
-  )
-  const timeline = [...groups.overdue, ...groups.upcoming].slice(0, 10)
+  // ----- Smart insights (all calculated in utils/insights.js) -----
+  const data = { bills, documents, subscriptions, tasks, appointments }
+  const spending = spendingInsight(bills)
+  const productivity = productivityInsight(tasks)
+  const recs = buildRecommendations(data, spending)
+  const hasAnyData = bills.length + tasks.length + documents.length + subscriptions.length + appointments.length > 0
 
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
@@ -101,50 +98,45 @@ export default function Dashboard() {
         })}
       />
 
-      <div className="stat-grid">
+      <div className="stat-grid stat-grid-compact">
         <StatCard
           label="Pending bills"
-          value={unpaidBills.length}
+          value={pendingBillCount}
           icon={Clock}
           tone="warning"
-          featured
-          progress={bills.length ? (paidCount / bills.length) * 100 : 0}
-          caption={`${paidCount} of ${bills.length} bills paid`}
+          sub={`${formatCurrency(outstanding)} outstanding`}
         />
-        <StatCard label="Completed bills" value={paidCount} icon={CheckCircle} tone="success" />
         <StatCard label="Subscriptions / month" value={Math.round(perMonth)} format={formatCurrency} icon={IndianRupee} tone="primary" />
         <StatCard label="Document alerts" value={expiryAlerts.length} icon={AlertTriangle} tone="danger" />
+        <StatCard
+          label="Tasks today"
+          value={tasksToday}
+          icon={CheckSquare}
+          tone="primary"
+          sub={tasksOverdue > 0 ? `${tasksOverdue} overdue` : 'None overdue'}
+        />
       </div>
 
-      <SmartInsights
-        bills={bills}
-        documents={documents}
-        subscriptions={subscriptions}
-        tasks={tasks}
-        appointments={appointments}
-        snoozes={snoozes}
-      />
+      <div className="attention-layout">
+        <NeedsAttention
+          bills={bills}
+          documents={documents}
+          subscriptions={subscriptions}
+          tasks={tasks}
+          appointments={appointments}
+          snoozes={snoozes}
+        />
+        <Recommendations recs={recs} hasAnyData={hasAnyData} />
+      </div>
+
+      <div className="summary-grid">
+        <SpendingCard data={spending} />
+        <ProductivityCard data={productivity} />
+      </div>
 
       <DashboardCharts bills={bills} tasks={tasks} />
 
       <div className="dash-grid">
-        <Panel title="Upcoming payments" to="/bills">
-          {upcomingPayments.length === 0 ? (
-            <Empty text="No pending bills. You're all caught up." />
-          ) : (
-            upcomingPayments.map((b) => (
-              <Row
-                key={b.id}
-                kind="bill"
-                title={b.title}
-                meta={formatCurrency(b.amount)}
-                date={formatDate(b.dueDate)}
-                badge={<StatusBadge status={dueStatus(b.dueDate, false)} />}
-              />
-            ))
-          )}
-        </Panel>
-
         <Panel title="Document expiry alerts" to="/documents">
           {expiryAlerts.length === 0 ? (
             <Empty text="No documents are close to expiring." />
@@ -159,32 +151,6 @@ export default function Dashboard() {
                 badge={<StatusBadge status={daysUntil(d.expiryDate) < 0 ? 'expired' : 'expiring'} />}
               />
             ))
-          )}
-        </Panel>
-
-        <Panel title="Today's tasks & appointments" to="/tasks">
-          {todayTasks.length + todayAppointments.length === 0 ? (
-            <Empty text="Nothing planned for today." />
-          ) : (
-            <>
-              {todayAppointments.map((a) => (
-                <Row
-                  key={a.id}
-                  kind="appointment"
-                  title={a.title}
-                  meta={[formatTime(a.time), a.location].filter(Boolean).join(' · ')}
-                />
-              ))}
-              {todayTasks.map((t) => (
-                <Row
-                  key={t.id}
-                  kind="task"
-                  title={t.title}
-                  meta={relativeDays(t.deadline)}
-                  badge={<StatusBadge status={t.priority.toLowerCase()} />}
-                />
-              ))}
-            </>
           )}
         </Panel>
 
@@ -203,23 +169,6 @@ export default function Dashboard() {
           )}
         </Panel>
       </div>
-
-      <Panel title="Timeline: what needs your attention" to="/reminders">
-        {timeline.length === 0 ? (
-          <Empty text="Nothing coming up soon." />
-        ) : (
-          timeline.map((r) => (
-            <Row
-              key={r.id}
-              kind={r.kind}
-              title={r.title}
-              meta={`${r.label}${r.detail ? ` · ${r.detail}` : ''}`}
-              date={formatDate(r.date)}
-              badge={<StatusBadge status={dueStatus(r.date, false)} />}
-            />
-          ))
-        )}
-      </Panel>
     </>
   )
 }

@@ -1,21 +1,16 @@
 import { Link } from 'react-router-dom'
 import {
-  TrendingUp, TrendingDown, Minus, Sparkles, ChevronRight, Lightbulb, CheckCircle2, AlertTriangle,
+  TrendingUp, TrendingDown, Minus, ChevronRight, Lightbulb, CheckCircle2, AlertTriangle,
   Info, Wallet, ListChecks,
 } from 'lucide-react'
-import StatusBadge from '../common/StatusBadge'
-import { formatCurrency, formatDate } from '../../utils/helpers'
-import { KIND_ICONS, KIND_TONES } from '../../utils/display'
-import {
-  spendingInsight, upcomingWeek, productivityInsight, financialInsight, buildRecommendations,
-} from '../../utils/insights'
+import { formatCurrency } from '../../utils/helpers'
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`
 
 const REC_ICONS = { danger: AlertTriangle, warning: AlertTriangle, info: Info }
 
 // ----- Spending: this month vs last month (all three summary cards share the same plain style) -----
-function SpendingCard({ data }) {
+export function SpendingCard({ data }) {
   const { state, current, previous, percent, lastMonth, thisMonth } = data
   const Trend = state === 'up' ? TrendingUp : state === 'down' ? TrendingDown : Minus
 
@@ -45,7 +40,7 @@ function SpendingCard({ data }) {
 }
 
 // ----- Productivity -----
-function ProductivityCard({ data }) {
+export function ProductivityCard({ data }) {
   const { total, completed, percent, doneThisWeek, dueNextWeek, overdue } = data
   return (
     <article className="insight-card">
@@ -78,97 +73,8 @@ function ProductivityCard({ data }) {
   )
 }
 
-// ----- Financial overview (amounts; the Payment status chart shows counts) -----
-function FinancialCard({ data }) {
-  const rows = [
-    { key: 'paid', label: 'Paid', color: 'var(--success)', ...data.paid },
-    { key: 'pending', label: 'Pending', color: 'var(--warning)', ...data.pending },
-    { key: 'overdue', label: 'Overdue', color: 'var(--danger)', ...data.overdue },
-  ]
-  return (
-    <article className="insight-card">
-      <header className="insight-top">
-        <span className="insight-icon tone-primary"><Wallet size={18} /></span>
-        <h3>Financial overview</h3>
-      </header>
-      {!data.hasBills ? (
-        <p className="insight-empty">Add a bill to see what you have paid and what is still outstanding.</p>
-      ) : (
-        <>
-          <div className="insight-figure">
-            {formatCurrency(data.outstanding)}
-            <span className="insight-figure-note">still to pay</span>
-          </div>
-          <ul className="money-rows">
-            {rows.map((r) => (
-              <li key={r.key}>
-                <span className="legend-dot" style={{ background: r.color }} />
-                <span className="money-label">{r.label}<small>{plural(r.count, 'bill')}</small></span>
-                <span className="money-amount">{formatCurrency(r.amount)}</span>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </article>
-  )
-}
-
-// ----- Upcoming responsibilities (next 7 days) -----
-function UpcomingCard({ items, overdue }) {
-  return (
-    <section className="insight-card insight-wide">
-      <header className="insight-top">
-        <span className="insight-icon tone-primary"><Sparkles size={18} /></span>
-        <div className="insight-top-text">
-          <h3>Coming up in the next 7 days</h3>
-        </div>
-        <Link to="/reminders" className="insight-link">All reminders</Link>
-      </header>
-
-      {items.length === 0 ? (
-        <p className="insight-empty">Nothing is due in the next 7 days.</p>
-      ) : (
-        <ul className="upcoming-list">
-          {items.slice(0, 6).map((r) => {
-            const Icon = KIND_ICONS[r.kind]
-            return (
-              <li key={r.id}>
-                <Link to={r.path} className="upcoming-row">
-                  <span className={`list-icon tone-${KIND_TONES[r.kind]}`}><Icon size={18} /></span>
-                  <span className="list-main">
-                    <strong>{r.title}</strong>
-                    <span className="muted">{[r.label, r.detail].filter(Boolean).join(' · ')}</span>
-                  </span>
-                  <span className="upcoming-when">
-                    <span>{r.when}</span>
-                    <span className="muted">{formatDate(r.date)}</span>
-                  </span>
-                  <span className="priority-slot"><StatusBadge status={r.priority} /></span>
-                  <ChevronRight size={16} className="row-chevron" aria-hidden="true" />
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
-      )}
-
-      {(items.length > 6 || overdue.length > 0) && (
-        <p className="insight-foot">
-          {items.length > 6 && `${items.length - 6} more this week. `}
-          {overdue.length > 0 && (
-            <Link to="/reminders" className="bad">
-              {plural(overdue.length, 'item')} overdue
-            </Link>
-          )}
-        </p>
-      )}
-    </section>
-  )
-}
-
 // ----- Smart recommendations -----
-function Recommendations({ recs, hasAnyData }) {
+export function Recommendations({ recs, hasAnyData }) {
   return (
     <section className="insight-card">
       <header className="insight-top">
@@ -209,29 +115,3 @@ function Recommendations({ recs, hasAnyData }) {
   )
 }
 
-// The Smart Insights section. All numbers are recalculated from Context data on every change.
-export default function SmartInsights({ bills, documents, subscriptions, tasks, appointments, snoozes }) {
-  const data = { bills, documents, subscriptions, tasks, appointments }
-  const spending = spendingInsight(bills)
-  const upcoming = upcomingWeek(data, snoozes)
-  const productivity = productivityInsight(tasks)
-  const financial = financialInsight(bills)
-  const recs = buildRecommendations(data, spending)
-  const hasAnyData = bills.length + tasks.length + documents.length + subscriptions.length + appointments.length > 0
-
-  return (
-    <section className="insights" aria-labelledby="insights-title">
-      <div className="insights-head">
-        <h2 id="insights-title">Smart insights</h2>
-        <p className="muted">Worked out from your bills, tasks, documents and subscriptions.</p>
-      </div>
-      <div className="insight-grid">
-        <SpendingCard data={spending} />
-        <ProductivityCard data={productivity} />
-        <FinancialCard data={financial} />
-        <UpcomingCard items={upcoming.items} overdue={upcoming.overdue} />
-        <Recommendations recs={recs} hasAnyData={hasAnyData} />
-      </div>
-    </section>
-  )
-}
