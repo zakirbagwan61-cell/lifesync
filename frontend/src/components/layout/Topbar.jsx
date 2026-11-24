@@ -142,6 +142,7 @@ export default function Topbar({ onMenuClick, onQuickAdd }) {
               {!waiting && suggestions.map((r, i) => {
                 const Icon = KIND_ICONS[r.kind]
                 return (
+                  // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- combobox options are driven from the input (arrows + Enter)
                   <li
                     key={r.id}
                     id={`search-option-${i}`}
@@ -161,6 +162,7 @@ export default function Topbar({ onMenuClick, onQuickAdd }) {
                 )
               })}
               {!waiting && (
+                // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- combobox option, driven from the input
                 <li
                   id={`search-option-${seeAllIndex}`}
                   role="option"

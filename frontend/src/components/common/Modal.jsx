@@ -128,7 +128,12 @@ export default function Modal({ isOpen, title, onClose, children }) {
 
   return (
     // Clicking the dark backdrop asks to close; clicking inside the dialog does not.
-    <div className="modal-backdrop" onClick={requestClose}>
+    <div
+      className="modal-backdrop"
+      role="presentation"
+      onClick={(e) => { if (e.target === e.currentTarget) requestClose() }}
+    >
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- the dialog container keeps Tab focus inside it */}
       <div
         ref={dialogRef}
         tabIndex={-1}
@@ -136,7 +141,6 @@ export default function Modal({ isOpen, title, onClose, children }) {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        onClick={(e) => e.stopPropagation()}
         onKeyDown={trapTab}
       >
         <div className="modal-header">

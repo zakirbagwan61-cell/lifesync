@@ -102,7 +102,7 @@ export default function Sidebar({ isOpen, onClose }) {
       </aside>
 
       {/* Dark backdrop behind the drawer on mobile; tap it to close */}
-      <div className={`overlay ${isOpen ? 'show' : ''}`} onClick={onClose} />
+      <div className={`overlay ${isOpen ? 'show' : ''}`} role="presentation" onClick={onClose} />
     </>
   )
 }

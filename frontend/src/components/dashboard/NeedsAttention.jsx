@@ -43,9 +43,9 @@ export default function NeedsAttention({ bills, documents, subscriptions, tasks,
 
   // `today` changes at midnight, which rebuilds the lists so "Today" is never yesterday's items.
   const today = useToday()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const lists = useMemo(
     () => buildAttentionLists({ bills, documents, subscriptions, tasks, appointments }, snoozes),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `today` is only here to rebuild the lists at midnight
     [bills, documents, subscriptions, tasks, appointments, snoozes, today]
   )
 
