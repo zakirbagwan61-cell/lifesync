@@ -1446,19 +1446,38 @@ button.badge:hover {
 }
 
 /* Needs attention (wide) beside Smart recommendations (narrow) */
+/* Named grid areas: Recommendations spans every row on the right, so its height is shared out
+   through the empty flexible last row instead of stretching Needs attention. The summary cards
+   then sit directly under Needs attention, whatever the height of either column. */
 .attention-layout {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas:
+    'attention recs'
+    'summary recs'
+    '. recs';
   gap: var(--space-5);
   margin-bottom: var(--space-5);
   align-items: start;
+}
+
+.attention-layout > .attention {
+  grid-area: attention;
+}
+
+.attention-layout > .insight-card {
+  grid-area: recs;
+}
+
+.attention-layout > .summary-grid {
+  grid-area: summary;
 }
 
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-5);
-  margin-bottom: var(--space-5);
 }
 
 .attention-toolbar {
@@ -1563,10 +1582,15 @@ button.badge:hover {
 @media (max-width: 1024px) {
   .attention-layout {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas:
+      'attention'
+      'recs'
+      'summary';
     gap: var(--space-4);
+    margin-bottom: var(--space-4);
   }
 
-  .summary-grid,
   .dash-grid,
   .analytics {
     margin-bottom: var(--space-4);

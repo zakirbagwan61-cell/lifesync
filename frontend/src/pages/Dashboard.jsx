@@ -127,11 +127,10 @@ export default function Dashboard() {
           snoozes={snoozes}
         />
         <Recommendations recs={recs} hasAnyData={hasAnyData} />
-      </div>
-
-      <div className="summary-grid">
-        <SpendingCard data={spending} />
-        <ProductivityCard data={productivity} />
+        <div className="summary-grid">
+          <SpendingCard data={spending} />
+          <ProductivityCard data={productivity} />
+        </div>
       </div>
 
       <DashboardCharts bills={bills} tasks={tasks} />

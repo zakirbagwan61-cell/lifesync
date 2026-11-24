@@ -1,6 +1,7 @@
 import { formatCurrency } from './helpers'
 import { formatTime } from './display'
 import { maskNumber } from './privacy'
+import { KIND_PATHS } from './insights'
 
 // Turn every item from every module into one flat, searchable list.
 // Each entry: { id, sourceId, kind, title, meta, date, completed, text }
@@ -50,3 +51,25 @@ export function filterSearchItems(items, query) {
 // Earliest date first; items without a date go last.
 export const sortSearchResults = (results) =>
   [...results].sort((a, b) => (a.date || '9999').localeCompare(b.date || '9999'))
+
+// Where "open this result" goes: the item's page, with ?focus so that page highlights the exact item.
+// Appointments share the Tasks page, so they also name their tab.
+export function searchItemPath(item) {
+  const base = `${KIND_PATHS[item.kind]}?focus=${encodeURIComponent(item.sourceId)}`
+  return item.kind === 'appointment' ? `${base}&tab=appointments` : base
+}
+
+// Best matches first for the live suggestions: a title that starts with the query, then a title
+// that contains it, then matches found only in other fields. Ties go by date (earliest first).
+export function rankSearchResults(results, query) {
+  const q = String(query ?? '').trim().toLowerCase()
+  const score = (r) => {
+    const title = r.title.toLowerCase()
+    if (title.startsWith(q)) return 0
+    if (title.includes(q)) return 1
+    return 2
+  }
+  return [...results].sort(
+    (a, b) => score(a) - score(b) || (a.date || '9999').localeCompare(b.date || '9999')
+  )
+}
