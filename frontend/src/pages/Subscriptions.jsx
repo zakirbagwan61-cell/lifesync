@@ -11,6 +11,8 @@ import { formatCurrency, formatDate, daysUntil } from '../utils/helpers'
 import { CYCLES, subscriptionFields } from '../utils/fields'
 import { useConfirm } from '../context/ConfirmContext'
 import { useToast } from '../context/ToastContext'
+import useFocusItem from '../hooks/useFocusItem'
+import { renewingSoonCount } from '../utils/subscriptions'
 
 // A subscription is "renewing soon" when it renews within this many days.
 const SOON_DAYS = 7
@@ -49,10 +51,14 @@ export default function Subscriptions() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingSub, setEditingSub] = useState(null) // null = adding a new subscription
 
+  // Opened from a link such as Search ("/subscriptions?focus=<id>"): clear the filter and highlight that row.
+  useFocusItem(() => setCycleFilter('All'))
+
   // ----- Numbers for the stat cards -----
   const perMonthTotal = subscriptions.reduce((sum, s) => sum + monthlyCost(s), 0)
   const perYearTotal = perMonthTotal * 12
-  const renewingSoon = subscriptions.filter((s) => daysUntil(s.nextRenewal) <= SOON_DAYS).length
+  // Renewals coming up in the next SOON_DAYS days (renewals that already passed are flagged in the table instead)
+  const renewingSoon = renewingSoonCount(subscriptions, SOON_DAYS)
 
   // ----- The list to show: cycle filter, soonest renewal first -----
   const visible = subscriptions
@@ -146,7 +152,7 @@ export default function Subscriptions() {
               {visible.map((sub) => {
                 const renewal = getRenewalInfo(sub)
                 return (
-                  <tr key={sub.id}>
+                  <tr key={sub.id} data-item-id={sub.id}>
                     <td><strong>{sub.name}</strong></td>
                     <td data-label="Cost">
                       {formatCurrency(sub.cost)}

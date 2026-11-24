@@ -6,8 +6,8 @@ import PageHeader from '../components/common/PageHeader'
 import StatusBadge from '../components/common/StatusBadge'
 import EmptyState from '../components/common/EmptyState'
 import Tabs, { tabPanelProps } from '../components/common/Tabs'
-import { formatDate } from '../utils/helpers'
-import { buildReminders, groupReminders } from '../utils/reminders'
+import { formatDate, todayString } from '../utils/helpers'
+import { buildReminders, groupReminders, leadTimeSummary } from '../utils/reminders'
 import { KIND_ICONS, KIND_TONES, dueStatus, relativeDays } from '../utils/display'
 import { useToast } from '../context/ToastContext'
 
@@ -80,7 +80,7 @@ export default function Reminders() {
   const snooze = (r, days) => {
     snoozeReminder(r.id, days)
     toast({
-      message: `"${r.title}" snoozed for ${days === 7 ? '1 week' : `${days} day${days === 1 ? '' : 's'}`}`,
+      message: `"${r.title}" snoozed for ${days === 30 ? '1 month' : days === 7 ? '1 week' : `${days} day${days === 1 ? '' : 's'}`}`,
       onAction: () => latest.current.unsnoozeReminder(r.id),
     })
   }
@@ -101,6 +101,8 @@ export default function Reminders() {
           onChange={setTab}
         />
       </div>
+
+      {tab === 'upcoming' && <p className="muted tab-hint">{leadTimeSummary()}</p>}
 
       <div {...tabPanelProps('reminders-tabs', tab)}>
       {list.length === 0 ? (
@@ -152,7 +154,9 @@ export default function Reminders() {
                 {(tab === 'overdue' || tab === 'upcoming') && (
                   <div className="reminder-actions">
                     {r.kind === 'document' ? (
-                      <Link to="/documents" className="btn-secondary btn-small">View document</Link>
+                      <Link to={`/documents?focus=${r.sourceId}`} className="btn-secondary btn-small">
+                        {r.date < todayString() ? 'Renew document' : 'View document'}
+                      </Link>
                     ) : (
                       <button className="btn-primary btn-small" onClick={() => markDone(r)}>
                         {DONE_LABEL[r.kind]}
@@ -169,6 +173,7 @@ export default function Reminders() {
                       <option value="1">1 day</option>
                       <option value="3">3 days</option>
                       <option value="7">1 week</option>
+                      <option value="30">1 month</option>
                     </select>
                   </div>
                 )}
@@ -176,6 +181,9 @@ export default function Reminders() {
             )
           })}
         </div>
+      )}
+      {tab === 'completed' && groups.completed.length > list.length && (
+        <p className="muted tab-hint">Showing the {list.length} most recent of {groups.completed.length} completed reminders.</p>
       )}
       </div>
     </>

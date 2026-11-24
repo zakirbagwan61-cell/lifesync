@@ -14,6 +14,7 @@ import { formatDate, daysUntil } from '../utils/helpers'
 
 import { DOC_TYPES, documentFields } from '../utils/fields'
 import { useConfirm } from '../context/ConfirmContext'
+import useFocusItem from '../hooks/useFocusItem'
 
 // One icon per document type.
 const TYPE_ICONS = {
@@ -55,6 +56,9 @@ export default function Documents() {
   const [typeFilter, setTypeFilter] = useState('All')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingDoc, setEditingDoc] = useState(null) // null = adding a new document
+
+  // Opened from a link such as Search or Reminders ("/documents?focus=<id>"): clear the filter and highlight that card.
+  useFocusItem(() => setTypeFilter('All'))
 
   // ----- Numbers for the stat cards and alert banner -----
   const expiredCount = documents.filter((d) => getExpiryStatus(d) === 'expired').length
@@ -146,7 +150,7 @@ export default function Documents() {
             const Icon = TYPE_ICONS[doc.type] || FileText
             const status = getExpiryStatus(doc)
             return (
-              <div key={doc.id} className="doc-card">
+              <div key={doc.id} className="doc-card" data-item-id={doc.id}>
                 <div className="doc-card-top">
                   <div className="stat-icon tone-primary">
                     <Icon size={22} />

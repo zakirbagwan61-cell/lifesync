@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Search as SearchIcon } from 'lucide-react'
 import { useApp } from '../context/AppContext'
@@ -7,6 +7,7 @@ import StatusBadge from '../components/common/StatusBadge'
 import EmptyState from '../components/common/EmptyState'
 import { formatCurrency, formatDate } from '../utils/helpers'
 import { formatTime, dueStatus, KIND_ICONS, KIND_TONES } from '../utils/display'
+import { maskNumber } from '../utils/privacy'
 
 // Which page "Open" goes to, and the name shown in the filter.
 const KIND_PATHS = {
@@ -31,33 +32,36 @@ export default function Search() {
 
   const query = (params.get('q') || '').trim()
 
+  // A new search starts with every type shown again
+  useEffect(() => setKindFilter('All'), [query])
+
   // Turn every item from every module into one searchable list.
   // `text` is all the words we search inside, in lowercase.
   const items = [
     ...bills.map((b) => ({
-      id: `bill-${b.id}`, kind: 'bill', title: b.title,
+      id: `bill-${b.id}`, sourceId: b.id, kind: 'bill', title: b.title,
       meta: `${b.category} · ${formatCurrency(b.amount)}`,
       date: b.dueDate, completed: b.status === 'paid',
       text: [b.title, b.category, b.amount].join(' ').toLowerCase(),
     })),
     ...documents.map((d) => ({
-      id: `document-${d.id}`, kind: 'document', title: `${d.type} (${d.holder})`,
-      meta: d.number, date: d.expiryDate, completed: false,
+      id: `document-${d.id}`, sourceId: d.id, kind: 'document', title: `${d.type} (${d.holder})`,
+      meta: maskNumber(d.number), // the full number is still searchable, but is not shown in the list date: d.expiryDate, completed: false,
       text: [d.type, d.holder, d.number, d.notes].join(' ').toLowerCase(),
     })),
     ...subscriptions.map((s) => ({
-      id: `subscription-${s.id}`, kind: 'subscription', title: s.name,
+      id: `subscription-${s.id}`, sourceId: s.id, kind: 'subscription', title: s.name,
       meta: `${formatCurrency(s.cost)} / ${s.cycle === 'Yearly' ? 'year' : 'month'}`,
       date: s.nextRenewal, completed: false,
       text: [s.name, s.cycle, s.cost].join(' ').toLowerCase(),
     })),
     ...tasks.map((t) => ({
-      id: `task-${t.id}`, kind: 'task', title: t.title,
+      id: `task-${t.id}`, sourceId: t.id, kind: 'task', title: t.title,
       meta: `${t.priority} priority`, date: t.deadline, completed: t.completed,
       text: [t.title, t.priority].join(' ').toLowerCase(),
     })),
     ...appointments.map((a) => ({
-      id: `appointment-${a.id}`, kind: 'appointment', title: a.title,
+      id: `appointment-${a.id}`, sourceId: a.id, kind: 'appointment', title: a.title,
       meta: [formatTime(a.time), a.location].filter(Boolean).join(' · '),
       date: a.date, completed: a.completed,
       text: [a.title, a.location].join(' ').toLowerCase(),
@@ -117,7 +121,7 @@ export default function Search() {
                   {r.date && <div>{formatDate(r.date)}</div>}
                   {r.date && <StatusBadge status={dueStatus(r.date, r.completed)} />}
                 </div>
-                <Link to={KIND_PATHS[r.kind]} className="btn-secondary btn-small">Open</Link>
+                <Link to={`${KIND_PATHS[r.kind]}?focus=${r.sourceId}`} className="btn-secondary btn-small" aria-label={`Open ${r.title}`}>Open</Link>
               </div>
             )
           })}

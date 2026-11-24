@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, Search, Plus, Moon, Sun, Bell } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import useTheme from '../../hooks/useTheme'
@@ -9,7 +9,26 @@ import { buildReminders, groupReminders } from '../../utils/reminders'
 // Press Enter in the search box to open the Search page with your text.
 export default function Topbar({ onMenuClick, onQuickAdd }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [query, setQuery] = useState('')
+  // On small screens the full hint does not fit in the box, so it is shortened there
+  const [compact, setCompact] = useState(() => window.matchMedia?.('(max-width: 560px)').matches ?? false)
+
+  useEffect(() => {
+    const media = window.matchMedia?.('(max-width: 560px)')
+    if (!media) return undefined
+    const update = (e) => setCompact(e.matches)
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
+
+  // When the Search page is showing (for example after a reload or a shared link),
+  // the box shows the word that is being searched for.
+  useEffect(() => {
+    if (location.pathname === '/search') {
+      setQuery(new URLSearchParams(location.search).get('q') || '')
+    }
+  }, [location.pathname, location.search])
   const { theme, toggleTheme } = useTheme()
   const { bills, documents, subscriptions, tasks, appointments, snoozes } = useApp()
 
@@ -37,7 +56,7 @@ export default function Topbar({ onMenuClick, onQuickAdd }) {
         <Search size={18} />
         <input
           type="search"
-          placeholder="Search bills, documents, tasks..."
+          placeholder={compact ? 'Search...' : 'Search bills, documents, tasks...'}
           aria-label="Search bills, documents, tasks"
           value={query}
           onChange={(e) => setQuery(e.target.value)}

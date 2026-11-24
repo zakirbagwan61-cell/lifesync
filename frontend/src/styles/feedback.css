@@ -136,3 +136,27 @@ h1[tabindex='-1']:focus {
     bottom: var(--space-4);
   }
 }
+
+/* ===== An item reached from a link (for example from Search) ===== */
+[data-item-id]:focus {
+  outline: none;
+}
+
+.flash-highlight {
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  animation: flash-item 2.4s ease-out;
+}
+
+/* Starts highlighted and fades back to the normal look (the end state is the element's own style) */
+@keyframes flash-item {
+  from {
+    background-color: var(--primary-soft);
+    outline-color: var(--primary);
+  }
+}
+
+/* A short explanation line under the tabs */
+.tab-hint {
+  margin: calc(var(--space-2) * -1) 0 var(--space-4);
+}

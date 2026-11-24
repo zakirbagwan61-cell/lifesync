@@ -14,6 +14,7 @@ import Tabs, { tabPanelProps } from '../components/common/Tabs'
 import { formatDate, daysUntil, todayString } from '../utils/helpers'
 import { PRIORITIES, taskFields, appointmentFields } from '../utils/fields'
 import { useConfirm } from '../context/ConfirmContext'
+import useFocusItem from '../hooks/useFocusItem'
 
 const PRIORITY_RANK = { High: 0, Medium: 1, Low: 2 } // used for sorting
 
@@ -44,12 +45,23 @@ export default function Tasks() {
   const confirm = useConfirm()
 
   const [tab, setTab] = useState('tasks') // 'tasks' | 'appointments'
-  const [statusFilter, setStatusFilter] = useState('pending') // 'pending' | 'completed' | 'all'
+  // Each tab remembers its own status filter: 'pending' | 'completed' | 'all'
+  const [statusFilters, setStatusFilters] = useState({ tasks: 'pending', appointments: 'pending' })
   const [priorityFilter, setPriorityFilter] = useState('All')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null) // null = adding something new
 
   const isTasks = tab === 'tasks'
+  const statusFilter = statusFilters[tab]
+  const setStatusFilter = (value) => setStatusFilters((current) => ({ ...current, [tab]: value }))
+
+  // Opened from a link such as Search ("/tasks?focus=<id>"): open the right tab, show every status, highlight the row.
+  useFocusItem((id, tabParam) => {
+    const target = tabParam === 'appointments' || appointments.some((a) => a.id === id) ? 'appointments' : 'tasks'
+    setTab(target)
+    setStatusFilters((current) => ({ ...current, [target]: 'all' }))
+    setPriorityFilter('All')
+  })
 
   // ----- Numbers for the stat cards and tab labels -----
   const pendingTasks = tasks.filter((t) => !t.completed)
@@ -57,6 +69,7 @@ export default function Tasks() {
   const overdueTasks = pendingTasks.filter((t) => daysUntil(t.deadline) < 0).length
   const pendingAppointments = appointments.filter((a) => !a.completed)
   const upcomingAppointments = pendingAppointments.filter((a) => daysUntil(a.date) >= 0).length
+  const overdueAppointments = pendingAppointments.length - upcomingAppointments // pending and already in the past
 
   // ----- Lists to show -----
   const matchesStatus = (item) =>
@@ -129,7 +142,10 @@ export default function Tasks() {
           label="Tasks or appointments"
           tabs={[
             { key: 'tasks', label: `Tasks (${pendingTasks.length} pending)` },
-            { key: 'appointments', label: `Appointments (${pendingAppointments.length} pending)` },
+            {
+              key: 'appointments',
+              label: `Appointments (${pendingAppointments.length} pending${overdueAppointments ? `, ${overdueAppointments} overdue` : ''})`,
+            },
           ]}
           value={tab}
           onChange={setTab}
@@ -182,7 +198,7 @@ export default function Tasks() {
                 const date = isTasks ? item.deadline : item.date
                 const toggle = () => (isTasks ? toggleTask(item.id) : toggleAppointment(item.id))
                 return (
-                  <tr key={item.id}>
+                  <tr key={item.id} data-item-id={item.id}>
                     {/* Round button: click to mark done / not done */}
                     <td style={{ width: 44 }}>
                       <button

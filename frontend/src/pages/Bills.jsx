@@ -13,6 +13,7 @@ import { formatCurrency, formatDate, daysUntil } from '../utils/helpers'
 import { CATEGORIES, billFields } from '../utils/fields'
 import { useConfirm } from '../context/ConfirmContext'
 import { useToast } from '../context/ToastContext'
+import useFocusItem from '../hooks/useFocusItem'
 
 // Work out which badge a bill should show.
 function getStatus(bill) {
@@ -36,6 +37,12 @@ export default function Bills() {
   const [category, setCategory] = useState('All')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingBill, setEditingBill] = useState(null) // null = adding a new bill
+
+  // Opened from a link such as Search ("/bills?focus=<id>"): show the right tab and highlight that bill.
+  useFocusItem((id) => {
+    setTab(bills.find((b) => b.id === id)?.status === 'paid' ? 'history' : 'upcoming')
+    setCategory('All')
+  })
 
   // ----- Numbers for the stat cards -----
   const unpaid = bills.filter((b) => b.status !== 'paid')
@@ -166,7 +173,7 @@ export default function Bills() {
             </thead>
             <tbody>
               {visible.map((bill) => (
-                <tr key={bill.id}>
+                <tr key={bill.id} data-item-id={bill.id}>
                   <td>
                     <strong>{bill.title}</strong>
                     {bill.recurring && <div className="muted">Repeats monthly</div>}

@@ -5,6 +5,21 @@ import { formatTime } from './display'
 // How many days before its date an item starts showing as "upcoming".
 export const LEAD_DAYS = { bill: 30, subscription: 30, document: 60, task: 30, appointment: 30 }
 
+const KIND_PLURALS = { bill: 'bills', subscription: 'subscriptions', document: 'documents', task: 'tasks', appointment: 'appointments' }
+
+// One sentence that explains the lead times above, built from LEAD_DAYS so it can never go out of date:
+// "Upcoming shows items due within 30 days, and documents within 60 days."
+export function leadTimeSummary() {
+  const counts = {}
+  Object.values(LEAD_DAYS).forEach((days) => {
+    counts[days] = (counts[days] || 0) + 1
+  })
+  const common = Number(Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0])
+  const others = Object.entries(LEAD_DAYS).filter(([, days]) => days !== common)
+  const extra = others.map(([kind, days]) => `${KIND_PLURALS[kind]} within ${days} days`).join(', ')
+  return `Upcoming shows items due within ${common} days${extra ? `, and ${extra}` : ''}.`
+}
+
 // Turn all the app's data into one flat list of reminders.
 // Each reminder: { id, kind, sourceId, title, label, detail, date, completed }
 export function buildReminders({ bills, documents, subscriptions, tasks, appointments }) {
