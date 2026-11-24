@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useModalDirty } from './Modal'
 import { trimValues, validateFields } from '../../utils/validation'
 
@@ -30,6 +30,8 @@ export default function ItemForm({
   onSubmit,
   onCancel,
   submitLabel = 'Save',
+  baselineValues, // what counts as "unchanged" for the unsaved-changes prompt (defaults to initialValues)
+  onValuesChange, // called with the current values whenever they change (used by Quick Add)
 }) {
   const [values, setValues] = useState(() => buildInitialValues(fields, initialValues))
   const [errors, setErrors] = useState({})
@@ -38,8 +40,14 @@ export default function ItemForm({
   // Tell the surrounding Modal (if any) when something has been typed, so it can
   // ask before throwing the changes away.
   const startValues = useRef(null)
-  if (startValues.current === null) startValues.current = buildInitialValues(fields, initialValues)
+  if (startValues.current === null) startValues.current = buildInitialValues(fields, baselineValues ?? initialValues)
   useModalDirty(fields.some((f) => String(values[f.name]) !== String(startValues.current[f.name])))
+
+  // Let a parent (Quick Add) keep a copy of what has been typed.
+  useEffect(() => {
+    onValuesChange?.(values)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values])
 
   // Update one field as the user types.
   const handleChange = (field, e) => {

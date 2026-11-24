@@ -1666,3 +1666,8 @@ button.badge:hover {
     min-height: 40px;
   }
 }
+
+.quick-add-note {
+  margin: calc(var(--space-2) * -1) 0 var(--space-3);
+  font-size: 12px;
+}
