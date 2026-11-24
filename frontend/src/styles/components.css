@@ -93,14 +93,14 @@
 
 /* Solid red button used to confirm destructive actions */
 .btn-danger-fill {
-  background: #dc2626;
-  border-color: #dc2626;
-  color: #fff;
+  background: var(--danger-solid);
+  border-color: var(--danger-solid);
+  color: var(--danger-solid-text);
 }
 
 .btn-danger-fill:hover {
-  background: #b91c1c;
-  border-color: #b91c1c;
+  background: var(--danger-solid-hover);
+  border-color: var(--danger-solid-hover);
 }
 
 .btn-small {
@@ -289,61 +289,12 @@
   flex: 1;
 }
 
-/* Featured stat card: brand gradient (text colors come from the --feature-* tokens) */
-.stat-card.featured {
-  position: relative;
-  overflow: hidden;
-  background: var(--gradient-action);
-  border-color: var(--feature-border);
-}
-
-/* A soft teal glow in the corner: a small decorative accent */
-.stat-card.featured::after {
-  content: '';
-  position: absolute;
-  top: -40px;
-  right: -40px;
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(45, 212, 191, 0.32) 0%, rgba(45, 212, 191, 0) 70%);
-  pointer-events: none;
-}
-
-.stat-card.featured .stat-value {
-  color: var(--feature-text);
-}
-
-.stat-card.featured .stat-label,
-.stat-card.featured .progress-caption {
-  color: var(--feature-muted);
-}
-
-.stat-card.featured .stat-icon {
-  background: rgba(255, 255, 255, 0.16);
-  color: var(--feature-text);
-}
-
-@media (hover: hover) {
-  .stat-card.featured:hover {
-    border-color: var(--feature-border);
-  }
-}
-
 /* ===== Progress bar: the fill grows with transform (no layout work) ===== */
-.progress-block {
-  margin-top: var(--space-3);
-}
-
 .progress {
   height: 6px;
   border-radius: 999px;
   background: var(--neutral-soft);
   overflow: hidden;
-}
-
-.stat-card.featured .progress {
-  background: rgba(255, 255, 255, 0.2);
 }
 
 .progress-fill {
@@ -355,16 +306,6 @@
   transform: scaleX(var(--p, 0));
   transition: transform 700ms var(--ease-out);
   animation: progress-grow 900ms var(--ease-out) both;
-}
-
-.stat-card.featured .progress-fill {
-  background: linear-gradient(90deg, #5eead4, #2dd4bf);
-}
-
-.progress-caption {
-  margin-top: 6px;
-  font-size: 12px;
-  color: var(--text-muted);
 }
 
 @keyframes progress-grow {
@@ -434,7 +375,8 @@ button.badge:hover {
   color: var(--primary-text);
 }
 
-.empty-state h3 {
+.empty-state-title {
+  display: block;
   font-size: 16px;
   font-weight: 600;
   margin-bottom: var(--space-1);
@@ -1683,4 +1625,26 @@ button.badge:hover {
   letter-spacing: 0.02em;
   color: var(--text-muted);
   margin-bottom: var(--space-2);
+}
+
+/* Small layout helpers (replace inline styles) */
+.form-actions-center {
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
+.form-actions-wrap {
+  flex-wrap: wrap;
+}
+
+.form-actions-spaced {
+  margin-top: var(--space-5);
+}
+
+.panel-spaced {
+  margin-top: var(--space-4);
+}
+
+.col-check {
+  width: 44px;
 }

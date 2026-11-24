@@ -4,7 +4,7 @@ export default function EmptyState({ icon: Icon, title, message, action }) {
   return (
     <div className="empty-state">
       {Icon && <Icon size={40} />}
-      <h3>{title}</h3>
+      <p className="empty-state-title">{title}</p>
       {message && <p>{message}</p>}
       {action}
     </div>

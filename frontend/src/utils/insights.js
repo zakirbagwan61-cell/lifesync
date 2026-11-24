@@ -1,5 +1,5 @@
 import { addMonths, daysUntil, formatCurrency, todayString } from './helpers'
-import { buildReminders, groupReminders } from './reminders'
+import { DOC_ALERT_DAYS, buildReminders, groupReminders } from './reminders'
 import { relativeDays } from './display'
 
 // Pure calculations for the Smart Insights section on the Dashboard.
@@ -122,7 +122,7 @@ export function buildRecommendations({ bills, documents, subscriptions, tasks },
   }
 
   const docs = documents
-    .filter((d) => d.expiryDate && daysUntil(d.expiryDate) <= 30)
+    .filter((d) => d.expiryDate && daysUntil(d.expiryDate) <= DOC_ALERT_DAYS)
     .sort((a, b) => a.expiryDate.localeCompare(b.expiryDate))
   if (docs[0]) {
     const left = daysUntil(docs[0].expiryDate)

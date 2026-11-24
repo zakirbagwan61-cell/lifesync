@@ -3,7 +3,10 @@ import { formatCurrency } from './helpers'
 import { formatTime } from './display'
 
 // How many days before its date an item starts showing as "upcoming".
-export const LEAD_DAYS = { bill: 30, subscription: 30, document: 60, task: 30, appointment: 30 }
+// A document counts as "expiring soon" (alerts, reminders, recommendations) within this many days.
+export const DOC_ALERT_DAYS = 60
+
+export const LEAD_DAYS = { bill: 30, subscription: 30, document: DOC_ALERT_DAYS, task: 30, appointment: 30 }
 
 const KIND_PLURALS = { bill: 'bills', subscription: 'subscriptions', document: 'documents', task: 'tasks', appointment: 'appointments' }
 

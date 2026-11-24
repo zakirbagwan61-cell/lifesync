@@ -3,6 +3,7 @@ import {
   KIND_PATHS, buildRecommendations, financialInsight, productivityInsight, spendingInsight, upcomingWeek,
 } from './insights'
 import { addDays } from './helpers'
+import { DOC_ALERT_DAYS, LEAD_DAYS } from './reminders'
 import { ZONES, inZone, setNow } from '../test/timezone'
 
 const TODAY = '2026-11-23'
@@ -233,10 +234,10 @@ describe('buildRecommendations', () => {
     expect(r).toMatchObject({ id: 'document', tone: 'danger', title: 'Insurance has expired', path: '/documents' })
   })
 
-  it('flags a document expiring within 30 days but not later', () => {
+  it('flags a document expiring within the shared alert window but not later', () => {
     const doc = (days) => ({ id: 'd', type: 'Passport', holder: 'A', expiryDate: addDays(TODAY, days) })
-    expect(recs({ documents: [doc(30)] })[0]).toMatchObject({ tone: 'warning', title: 'Passport expires in 30 days' })
-    expect(recs({ documents: [doc(31)] })).toEqual([])
+    expect(recs({ documents: [doc(DOC_ALERT_DAYS)] })[0]).toMatchObject({ tone: 'warning', title: `Passport expires in ${DOC_ALERT_DAYS} days` })
+    expect(recs({ documents: [doc(DOC_ALERT_DAYS + 1)] })).toEqual([])
     expect(recs({ documents: [{ id: 'n', type: 'Aadhaar', holder: 'A', expiryDate: '' }] })).toEqual([])
   })
 
@@ -281,6 +282,13 @@ describe('buildRecommendations', () => {
   it('honours a custom limit', () => {
     const data = { ...none, bills: [unpaid('late', 1, '2026-11-21')], tasks: [task('t', addDays(TODAY, -1))] }
     expect(buildRecommendations(data, spendingInsight(data.bills), 1)).toHaveLength(1)
+  })
+})
+
+describe('document alert window', () => {
+  it('is one value shared by reminders, alerts and recommendations', () => {
+    expect(DOC_ALERT_DAYS).toBe(60)
+    expect(LEAD_DAYS.document).toBe(DOC_ALERT_DAYS)
   })
 })
 

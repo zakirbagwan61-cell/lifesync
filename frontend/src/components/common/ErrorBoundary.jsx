@@ -61,7 +61,7 @@ export default class ErrorBoundary extends Component {
               activity history stored in this browser, and restores the sample data. It cannot be undone.
               Your light/dark theme choice is kept.
             </p>
-            <div className="form-actions" style={{ justifyContent: 'center', marginTop: 16 }}>
+            <div className="form-actions form-actions-center">
               <button
                 ref={this.keepRef}
                 className="btn-secondary"
@@ -87,7 +87,7 @@ export default class ErrorBoundary extends Component {
               ? 'The rest of LifeSync still works. Try again, go back to the Dashboard, or reset the saved data if it keeps happening.'
               : 'Try reloading the page. If it keeps happening, reset the saved data.'}
           </p>
-          <div className="form-actions" style={{ justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
+          <div className="form-actions form-actions-center form-actions-wrap">
             {compact ? (
               <>
                 <button className="btn-primary" onClick={() => this.setState({ hasError: false })}>

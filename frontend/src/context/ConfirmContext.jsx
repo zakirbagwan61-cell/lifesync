@@ -30,7 +30,7 @@ export function ConfirmProvider({ children }) {
 
       <Modal isOpen={!!options} title={options?.title || 'Are you sure?'} onClose={() => close(false)}>
         <p className="confirm-text">{options?.message}</p>
-        <div className="form-actions" style={{ marginTop: 20 }}>
+        <div className="form-actions form-actions-spaced">
           <button className="btn-secondary" onClick={() => close(false)}>
             Cancel
           </button>

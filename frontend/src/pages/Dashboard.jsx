@@ -9,15 +9,13 @@ import NeedsAttention from '../components/dashboard/NeedsAttention'
 import { SpendingCard, ProductivityCard, Recommendations } from '../components/insights/SmartInsights'
 import { formatCurrency, formatDate, daysUntil } from '../utils/helpers'
 import useToday from '../hooks/useToday'
+import { DOC_ALERT_DAYS } from '../utils/reminders'
 import {
   spendingInsight, productivityInsight, financialInsight, buildRecommendations,
 } from '../utils/insights'
 import {
   KIND_ICONS, KIND_TONES, describeActivity, formatDateTime,
 } from '../utils/display'
-
-// A document shows up in the alerts when it expires within this many days (or already has).
-const DOC_ALERT_DAYS = 60
 
 // A card with a title and a "View all" link.
 function Panel({ title, to, children }) {

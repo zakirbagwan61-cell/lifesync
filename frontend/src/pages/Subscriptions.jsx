@@ -171,7 +171,6 @@ export default function Subscriptions() {
                       {/* Click the badge to switch auto-renew on or off */}
                       <button
                         className={`badge tone-${sub.autoRenew ? 'success' : 'neutral'}`}
-                        style={{ border: 'none' }}
                         title="Click to toggle auto-renew"
                         aria-label={`Auto-renew for ${sub.name}`}
                         aria-pressed={sub.autoRenew}

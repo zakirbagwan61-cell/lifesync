@@ -14,28 +14,10 @@ import Tabs, { tabPanelProps } from '../components/common/Tabs'
 import { formatDate, daysUntil, todayString } from '../utils/helpers'
 import { PRIORITIES, taskFields, appointmentFields } from '../utils/fields'
 import { useConfirm } from '../context/ConfirmContext'
+import { dueStatus, formatTime } from '../utils/display'
 import useFocusItem from '../hooks/useFocusItem'
 
 const PRIORITY_RANK = { High: 0, Medium: 1, Low: 2 } // used for sorting
-
-// Which badge to show next to a date: done, overdue, due within 2 days, or normal.
-function getDueStatus(dateString, completed) {
-  if (completed) return 'completed'
-  const days = daysUntil(dateString)
-  if (days < 0) return 'overdue'
-  if (days <= 2) return 'soon'
-  return 'pending'
-}
-
-// "15:00" -> "3:00 pm"
-function formatTime(time) {
-  if (!time) return ''
-  return new Date(`1970-01-01T${time}`).toLocaleTimeString('en-IN', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  })
-}
 
 export default function Tasks() {
   const {
@@ -200,7 +182,7 @@ export default function Tasks() {
                 return (
                   <tr key={item.id} data-item-id={item.id}>
                     {/* Round button: click to mark done / not done */}
-                    <td style={{ width: 44 }}>
+                    <td className="col-check">
                       <button
                         className={`check-btn ${item.completed ? 'done' : ''}`}
                         title={item.completed ? 'Mark as pending' : 'Mark as done'}
@@ -226,7 +208,7 @@ export default function Tasks() {
                       {formatDate(date)}
                       {!isTasks && <span className="muted"> · {formatTime(item.time)}</span>}
                       <div>
-                        <StatusBadge status={getDueStatus(date, item.completed)} />
+                        <StatusBadge status={dueStatus(date, item.completed)} />
                       </div>
                     </td>
                     <td>

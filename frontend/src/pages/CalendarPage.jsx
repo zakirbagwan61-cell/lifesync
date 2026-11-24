@@ -207,7 +207,7 @@ export default function CalendarPage() {
       </div>
 
       {/* Events of the selected day */}
-      <section className="panel" style={{ marginTop: 16 }}>
+      <section className="panel panel-spaced">
         <div className="panel-header">
           <h2>{selected === today ? 'Today' : formatDate(selected)}</h2>
           <span className="muted">

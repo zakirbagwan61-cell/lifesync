@@ -40,11 +40,14 @@
   /* Semantic: solid (icons, dots), soft (badge backgrounds), text (readable on soft) */
   --success: #15803d;
   --success-soft: #e7f6ec;
-  --success-text: #15803d;
+  --success-text: #166534;
   --warning: #d97706;
   --warning-soft: #fef3e2;
   --warning-text: #b45309;
   --danger: #dc2626;
+  --danger-solid: #dc2626; /* red buttons with white text: the same in both themes */
+  --danger-solid-hover: #b91c1c;
+  --danger-solid-text: #ffffff;
   --danger-soft: #fdecec;
   --danger-text: #b91c1c;
   --info: #0284c7;
@@ -88,16 +91,9 @@
 
   /* Gradients (same Teal + Deep Navy identity; used selectively, never on inputs or page backgrounds)
      - primary: decorative accents only (white text on #0D9488 is 3.7:1, so no text sits on it)
-     - action: for surfaces that carry text; starts at the AA-safe teal used by primary buttons
      - soft: selected states and small accent areas */
   --gradient-primary: linear-gradient(135deg, #0d9488 0%, #12343b 100%);
-  --gradient-action: linear-gradient(135deg, #0f766e 0%, #12343b 100%);
   --gradient-soft: linear-gradient(135deg, #e6fffb 0%, #ccfbf1 100%);
-  --gradient-cta: var(--gradient-action);
-  --gradient-cta-hover: linear-gradient(135deg, #115e59 0%, #0e2a30 100%);
-  --feature-text: #ffffff; /* text on the featured (gradient) stat card */
-  --feature-muted: rgba(255, 255, 255, 0.86);
-  --feature-border: transparent;
   --badge-text: #ffffff;
 
   /* Chart series colors: the teal + navy brand family, with blue and slate as supporting tones */
@@ -160,13 +156,7 @@
   --overlay: rgba(3, 10, 12, 0.65);
 
   --gradient-primary: linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%);
-  --gradient-action: linear-gradient(135deg, #122326 0%, #183034 100%);
   --gradient-soft: linear-gradient(135deg, #123f3c 0%, #183034 100%);
-  --gradient-cta: linear-gradient(135deg, #5eead4 0%, #2dd4bf 100%); /* dark text stays AA-readable */
-  --gradient-cta-hover: linear-gradient(135deg, #99f6e4 0%, #5eead4 100%);
-  --feature-text: #e6f4f2;
-  --feature-muted: #b8ccca;
-  --feature-border: #2f5f62;
   --badge-text: #3b0a0a; /* dark text on the light red badge: 6.2:1 (white was 2.8:1) */
 
   --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.4);
@@ -417,8 +407,8 @@ h4 {
 }
 
 .sidebar-footer button:hover {
-  background: var(--surface-hover);
-  color: var(--text-heading);
+  background: var(--danger-soft);
+  color: var(--danger-text);
 }
 
 .overlay {
@@ -553,24 +543,6 @@ h4 {
 }
 
 /* Quick Add: the one primary button that carries the brand gradient */
-.topbar .btn-primary {
-  background: var(--gradient-cta);
-  border-color: transparent;
-  transition:
-    box-shadow var(--ease),
-    transform 80ms ease,
-    filter var(--ease);
-}
-
-.topbar .btn-primary:hover {
-  background: var(--gradient-cta-hover);
-  box-shadow: var(--shadow-md);
-}
-
-:root[data-theme='dark'] .topbar .btn-primary:hover {
-  box-shadow: 0 0 0 3px var(--primary-ring);
-}
-
 /* Page content: a short fade and rise whenever you navigate (opacity + transform only) */
 .page-content {
   animation: page-in 260ms var(--ease-out) both;

@@ -11,6 +11,7 @@ import EmptyState from '../components/common/EmptyState'
 import Modal from '../components/common/Modal'
 import ItemForm from '../components/common/ItemForm'
 import { formatDate, daysUntil } from '../utils/helpers'
+import { DOC_ALERT_DAYS } from '../utils/reminders'
 
 import { DOC_TYPES, documentFields } from '../utils/fields'
 import { useConfirm } from '../context/ConfirmContext'
@@ -27,7 +28,6 @@ const TYPE_ICONS = {
 }
 
 // A document counts as "expiring soon" when it expires within this many days.
-const ALERT_DAYS = 60
 
 
 
@@ -36,7 +36,7 @@ function getExpiryStatus(doc) {
   if (!doc.expiryDate) return null
   const days = daysUntil(doc.expiryDate)
   if (days < 0) return 'expired'
-  if (days <= ALERT_DAYS) return 'expiring'
+  if (days <= DOC_ALERT_DAYS) return 'expiring'
   return 'valid'
 }
 
@@ -112,7 +112,7 @@ export default function Documents() {
           <AlertCircle size={20} />
           <span>
             {needAttention} document{needAttention === 1 ? '' : 's'} need attention:{' '}
-            {expiredCount} expired, {expiringCount} expiring within {ALERT_DAYS} days.
+            {expiredCount} expired, {expiringCount} expiring within {DOC_ALERT_DAYS} days.
           </span>
         </div>
       )}

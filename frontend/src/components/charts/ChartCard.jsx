@@ -3,9 +3,9 @@ import { BarChart3 } from 'lucide-react'
 // The card around every chart: title, optional control on the right, a note, and
 // a designed empty state when there is not enough data yet.
 //   <ChartCard title="..." subtitle="..." empty={!hasData} emptyText="...">{chart}</ChartCard>
-export default function ChartCard({ title, subtitle, action, empty, emptyText, note, wide, bare, children }) {
+export default function ChartCard({ title, subtitle, action, empty, emptyText, note, bare, children }) {
   return (
-    <section className={`${bare ? '' : 'panel '}chart-card${wide ? ' chart-wide' : ''}`} aria-label={bare ? title : undefined}>
+    <section className={`${bare ? '' : 'panel '}chart-card`} aria-label={bare ? title : undefined}>
       <div className="chart-head">
         <div>
           {bare ? <h3>{title}</h3> : <h2>{title}</h2>}
