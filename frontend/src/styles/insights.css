@@ -151,44 +151,7 @@
   font-weight: 600;
 }
 
-/* ===== Featured spending card ===== */
-.insight-card.featured {
-  overflow: hidden;
-  background: var(--gradient-action);
-  border-color: var(--feature-border);
-  color: var(--feature-muted);
-}
-
-.insight-card.featured::after {
-  content: '';
-  position: absolute;
-  top: -50px;
-  right: -50px;
-  width: 170px;
-  height: 170px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(45, 212, 191, 0.3) 0%, rgba(45, 212, 191, 0) 70%);
-  pointer-events: none;
-}
-
-.insight-card.featured .insight-top h3,
-.insight-card.featured .insight-figure {
-  color: var(--feature-text);
-}
-
-.insight-card.featured .insight-text {
-  color: var(--feature-muted);
-}
-
-.insight-card.featured .insight-icon {
-  background: rgba(255, 255, 255, 0.16);
-  color: var(--feature-text);
-}
-
-.insight-card.featured:hover {
-  border-color: var(--feature-border);
-}
-
+/* ===== Spending trend pill (same soft tones as the status badges) ===== */
 .trend-pill {
   align-self: flex-start;
   display: inline-flex;
@@ -196,10 +159,23 @@
   gap: 6px;
   padding: 3px 10px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
-  color: var(--feature-text);
   font-size: 12px;
   font-weight: 600;
+}
+
+.trend-pill.up {
+  background: var(--warning-soft);
+  color: var(--warning-text);
+}
+
+.trend-pill.down {
+  background: var(--success-soft);
+  color: var(--success-text);
+}
+
+.trend-pill.same {
+  background: var(--neutral-soft);
+  color: var(--text);
 }
 
 /* ===== Productivity ===== */

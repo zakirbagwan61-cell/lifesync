@@ -14,7 +14,7 @@ const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`
 
 const REC_ICONS = { danger: AlertTriangle, warning: AlertTriangle, info: Info }
 
-// ----- Spending: the highlighted card (brand gradient) -----
+// ----- Spending: this month vs last month (all three summary cards share the same plain style) -----
 function SpendingCard({ data }) {
   const { state, current, previous, percent, lastMonth, thisMonth } = data
   const Trend = state === 'up' ? TrendingUp : state === 'down' ? TrendingDown : Minus
@@ -27,9 +27,9 @@ function SpendingCard({ data }) {
   else message = `${Math.round(Math.abs(percent))}% less than the ${formatCurrency(previous)} paid in ${lastMonth}, with the month still in progress.`
 
   return (
-    <article className="insight-card featured">
+    <article className="insight-card">
       <header className="insight-top">
-        <span className="insight-icon"><Wallet size={18} /></span>
+        <span className="insight-icon tone-primary"><Wallet size={18} /></span>
         <h3>Spending in {thisMonth}</h3>
       </header>
       <div className="insight-figure">{formatCurrency(current)}</div>
