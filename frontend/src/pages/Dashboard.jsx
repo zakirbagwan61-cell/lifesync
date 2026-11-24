@@ -7,7 +7,8 @@ import StatusBadge from '../components/common/StatusBadge'
 import DashboardCharts from '../components/charts/DashboardCharts'
 import NeedsAttention from '../components/dashboard/NeedsAttention'
 import { SpendingCard, ProductivityCard, Recommendations } from '../components/insights/SmartInsights'
-import { formatCurrency, formatDate, daysUntil, todayString } from '../utils/helpers'
+import { formatCurrency, formatDate, daysUntil } from '../utils/helpers'
+import useToday from '../hooks/useToday'
 import {
   spendingInsight, productivityInsight, financialInsight, buildRecommendations,
 } from '../utils/insights'
@@ -56,7 +57,7 @@ const Empty = ({ text }) => <p className="muted panel-empty">{text}</p>
 
 export default function Dashboard() {
   const { userName, bills, documents, subscriptions, tasks, appointments, activity, snoozes } = useApp()
-  const today = todayString()
+  const today = useToday() // re-renders at midnight so the day-based numbers stay correct
 
   // ----- Numbers for the stat cards -----
   const { outstanding } = financialInsight(bills)

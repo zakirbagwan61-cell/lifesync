@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import { ChevronRight, Receipt } from 'lucide-react'
 import StatusBadge from '../common/StatusBadge'
 import Tabs, { tabPanelProps } from '../common/Tabs'
-import { daysUntil, formatDate } from '../../utils/helpers'
-import { buildReminders, groupReminders } from '../../utils/reminders'
+import { formatDate } from '../../utils/helpers'
+import { buildAttentionLists, onlyBills } from '../../utils/attention'
+import useToday from '../../hooks/useToday'
 import { KIND_PATHS } from '../../utils/insights'
 import { KIND_ICONS, KIND_TONES, dueStatus, relativeDays } from '../../utils/display'
 import useReminderActions, { DONE_LABEL } from '../../hooks/useReminderActions'
@@ -40,30 +41,15 @@ export default function NeedsAttention({ bills, documents, subscriptions, tasks,
   const [expanded, setExpanded] = useState(false)
   const { markDone, snooze } = useReminderActions()
 
-  const lists = useMemo(() => {
-    const groups = groupReminders(
-      buildReminders({ bills, documents, subscriptions, tasks, appointments }),
-      snoozes
-    )
-    // Today's appointments come first, in time order, then everything else due today.
-    const timeOf = Object.fromEntries(appointments.map((a) => [`appointment-${a.id}`, a.time || '']))
-    const today = groups.upcoming
-      .filter((r) => daysUntil(r.date) === 0)
-      .sort((a, b) => {
-        const aAppt = a.kind === 'appointment'
-        const bAppt = b.kind === 'appointment'
-        if (aAppt !== bAppt) return aAppt ? -1 : 1
-        return aAppt ? (timeOf[a.id] || '').localeCompare(timeOf[b.id] || '') : 0
-      })
-    return {
-      today,
-      week: groups.upcoming.filter((r) => daysUntil(r.date) <= 7),
-      overdue: groups.overdue,
-      all: [...groups.overdue, ...groups.upcoming],
-    }
-  }, [bills, documents, subscriptions, tasks, appointments, snoozes])
+  // `today` changes at midnight, which rebuilds the lists so "Today" is never yesterday's items.
+  const today = useToday()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const lists = useMemo(
+    () => buildAttentionLists({ bills, documents, subscriptions, tasks, appointments }, snoozes),
+    [bills, documents, subscriptions, tasks, appointments, snoozes, today]
+  )
 
-  const visible = (key) => (billsOnly ? lists[key].filter((r) => r.kind === 'bill') : lists[key])
+  const visible = (key) => (billsOnly ? onlyBills(lists[key]) : lists[key])
   const list = visible(tab)
   const shown = expanded ? list : list.slice(0, COLLAPSED_COUNT)
   const hidden = list.length - shown.length

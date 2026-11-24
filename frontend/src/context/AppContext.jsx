@@ -1,9 +1,10 @@
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useEffect } from 'react'
 import useLocalStorage from '../hooks/useLocalStorage'
 import { generateId, todayString, addDays, addMonths } from '../utils/helpers'
 import { reopenBillInList } from '../utils/bills'
 import { isPlainObject, isRecordList, isText } from '../utils/storage'
 import { MAX_ACTIVITY } from '../utils/activity'
+import { pruneSnoozes } from '../utils/snoozes'
 
 // Context = one shared store that every page can read from.
 // Phase 3 added bills, 4 documents, 5 subscriptions, 6 tasks + appointments,
@@ -93,6 +94,14 @@ export function AppProvider({ children }) {
     )
 
   const clearActivity = () => setActivity([])
+
+  // Drop snoozes that have ended or whose item was deleted, so the saved list does not grow forever.
+  // pruneSnoozes returns the same object when there is nothing to remove, so this does not loop.
+  useEffect(() => {
+    const pruned = pruneSnoozes(snoozes, { bills, documents, subscriptions, tasks, appointments })
+    if (pruned !== snoozes) setSnoozes(pruned)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snoozes, bills, documents, subscriptions, tasks, appointments])
 
   // ----- Reminder snooze -----
   // Hide a reminder for a number of days. Stored as { reminderId: 'YYYY-MM-DD' }.
