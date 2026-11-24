@@ -5,18 +5,11 @@ import { useApp } from '../context/AppContext'
 import PageHeader from '../components/common/PageHeader'
 import StatusBadge from '../components/common/StatusBadge'
 import EmptyState from '../components/common/EmptyState'
-import { formatCurrency, formatDate } from '../utils/helpers'
-import { formatTime, dueStatus, KIND_ICONS, KIND_TONES } from '../utils/display'
-import { maskNumber } from '../utils/privacy'
+import { formatDate } from '../utils/helpers'
+import { dueStatus, KIND_ICONS, KIND_TONES } from '../utils/display'
+import { KIND_PATHS } from '../utils/insights'
+import { buildSearchItems, filterSearchItems, sortSearchResults } from '../utils/search'
 
-// Which page "Open" goes to, and the name shown in the filter.
-const KIND_PATHS = {
-  bill: '/bills',
-  document: '/documents',
-  subscription: '/subscriptions',
-  task: '/tasks',
-  appointment: '/tasks',
-}
 const KIND_LABELS = {
   bill: 'Bills',
   document: 'Documents',
@@ -35,43 +28,9 @@ export default function Search() {
   // A new search starts with every type shown again
   useEffect(() => setKindFilter('All'), [query])
 
-  // Turn every item from every module into one searchable list.
-  // `text` is all the words we search inside, in lowercase.
-  const items = [
-    ...bills.map((b) => ({
-      id: `bill-${b.id}`, sourceId: b.id, kind: 'bill', title: b.title,
-      meta: `${b.category} · ${formatCurrency(b.amount)}`,
-      date: b.dueDate, completed: b.status === 'paid',
-      text: [b.title, b.category, b.amount].join(' ').toLowerCase(),
-    })),
-    ...documents.map((d) => ({
-      id: `document-${d.id}`, sourceId: d.id, kind: 'document', title: `${d.type} (${d.holder})`,
-      meta: maskNumber(d.number), // the full number is still searchable, but is not shown in the list date: d.expiryDate, completed: false,
-      text: [d.type, d.holder, d.number, d.notes].join(' ').toLowerCase(),
-    })),
-    ...subscriptions.map((s) => ({
-      id: `subscription-${s.id}`, sourceId: s.id, kind: 'subscription', title: s.name,
-      meta: `${formatCurrency(s.cost)} / ${s.cycle === 'Yearly' ? 'year' : 'month'}`,
-      date: s.nextRenewal, completed: false,
-      text: [s.name, s.cycle, s.cost].join(' ').toLowerCase(),
-    })),
-    ...tasks.map((t) => ({
-      id: `task-${t.id}`, sourceId: t.id, kind: 'task', title: t.title,
-      meta: `${t.priority} priority`, date: t.deadline, completed: t.completed,
-      text: [t.title, t.priority].join(' ').toLowerCase(),
-    })),
-    ...appointments.map((a) => ({
-      id: `appointment-${a.id}`, sourceId: a.id, kind: 'appointment', title: a.title,
-      meta: [formatTime(a.time), a.location].filter(Boolean).join(' · '),
-      date: a.date, completed: a.completed,
-      text: [a.title, a.location].join(' ').toLowerCase(),
-    })),
-  ]
-
-  const results = query ? items.filter((i) => i.text.includes(query.toLowerCase())) : []
-  const shown = results
-    .filter((r) => kindFilter === 'All' || r.kind === kindFilter)
-    .sort((a, b) => (a.date || '9999').localeCompare(b.date || '9999'))
+  const items = buildSearchItems({ bills, documents, subscriptions, tasks, appointments })
+  const results = filterSearchItems(items, query)
+  const shown = sortSearchResults(results.filter((r) => kindFilter === 'All' || r.kind === kindFilter))
 
   return (
     <>
