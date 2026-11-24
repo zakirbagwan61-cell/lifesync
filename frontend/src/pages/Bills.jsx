@@ -7,6 +7,7 @@ import StatusBadge from '../components/common/StatusBadge'
 import EmptyState from '../components/common/EmptyState'
 import Modal from '../components/common/Modal'
 import ItemForm from '../components/common/ItemForm'
+import Tabs, { tabPanelProps } from '../components/common/Tabs'
 import { formatCurrency, formatDate, daysUntil } from '../utils/helpers'
 
 import { CATEGORIES, billFields } from '../utils/fields'
@@ -120,14 +121,13 @@ export default function Bills() {
 
       {/* Tabs + category filter */}
       <div className="toolbar">
-        <div className="tabs">
-          <button className={`tab ${tab === 'upcoming' ? 'active' : ''}`} onClick={() => setTab('upcoming')}>
-            Upcoming
-          </button>
-          <button className={`tab ${tab === 'history' ? 'active' : ''}`} onClick={() => setTab('history')}>
-            Payment history
-          </button>
-        </div>
+        <Tabs
+          id="bills-tabs"
+          label="Bills view"
+          tabs={[{ key: 'upcoming', label: 'Upcoming' }, { key: 'history', label: 'Payment history' }]}
+          value={tab}
+          onChange={setTab}
+        />
 
         <select className="filter-select" aria-label="Filter by category" value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="All">All categories</option>
@@ -137,6 +137,7 @@ export default function Bills() {
         </select>
       </div>
 
+      <div {...tabPanelProps('bills-tabs', tab)}>
       {visible.length === 0 ? (
         <EmptyState
           icon={Receipt}
@@ -199,6 +200,7 @@ export default function Bills() {
           </table>
         </div>
       )}
+      </div>
 
       {/* The same modal is used for adding and editing */}
       <Modal isOpen={modalOpen} title={editingBill ? 'Edit bill' : 'Add bill'} onClose={closeModal}>

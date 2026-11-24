@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { useModalDirty } from './Modal'
+import { trimValues, validateFields } from '../../utils/validation'
 
 // A generic form built from a list of field definitions, so Bills, Documents,
 // Subscriptions, Tasks and Quick Add can all reuse it.
@@ -21,24 +22,6 @@ function buildInitialValues(fields, initialValues) {
     values[f.name] = initialValues?.[f.name] ?? (f.type === 'checkbox' ? false : '')
   })
   return values
-}
-
-// Returns an object like { title: 'This field is required' }. Empty object = valid.
-function validate(fields, values) {
-  const errors = {}
-  fields.forEach((f) => {
-    const value = values[f.name]
-    const isEmpty = value === '' || value === null || value === undefined
-
-    if (f.required && f.type !== 'checkbox' && isEmpty) {
-      errors[f.name] = `${f.label} is required`
-    } else if (f.type === 'number' && !isEmpty && Number(value) < 0) {
-      errors[f.name] = `${f.label} cannot be negative`
-    } else if (f.type === 'date' && !isEmpty && Number.isNaN(new Date(value).getTime())) {
-      errors[f.name] = `${f.label} must be a valid date`
-    }
-  })
-  return errors
 }
 
 export default function ItemForm({
@@ -67,7 +50,10 @@ export default function ItemForm({
 
   const handleSubmit = (e) => {
     e.preventDefault() // stop the browser from reloading the page
-    const foundErrors = validate(fields, values)
+    // Remove spaces around typed text first, so "   " counts as empty and saved text is tidy
+    const trimmed = trimValues(fields, values)
+    setValues(trimmed)
+    const foundErrors = validateFields(fields, trimmed)
     setErrors(foundErrors)
     if (Object.keys(foundErrors).length > 0) {
       // Stay on the form, show the errors and put the cursor in the first field that needs fixing
@@ -77,7 +63,7 @@ export default function ItemForm({
     }
 
     // Convert number fields from text ("500") to real numbers (500) before returning.
-    const cleaned = { ...values }
+    const cleaned = { ...trimmed }
     fields.forEach((f) => {
       if (f.type === 'number' && cleaned[f.name] !== '') cleaned[f.name] = Number(cleaned[f.name])
     })
@@ -107,7 +93,7 @@ export default function ItemForm({
       )
     }
     if (f.type === 'textarea') {
-      return <textarea {...common} rows={3} value={values[f.name]} placeholder={f.placeholder} />
+      return <textarea {...common} rows={3} value={values[f.name]} maxLength={f.maxLength} placeholder={f.placeholder} />
     }
     if (f.type === 'checkbox') {
       return <input {...common} type="checkbox" checked={values[f.name]} />
@@ -118,6 +104,7 @@ export default function ItemForm({
         type={f.type || 'text'}
         value={values[f.name]}
         placeholder={f.placeholder}
+        maxLength={f.maxLength}
         min={f.type === 'number' ? 0 : undefined}
       />
     )

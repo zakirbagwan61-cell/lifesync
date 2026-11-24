@@ -960,9 +960,37 @@ button.badge:hover {
 
 .dot {
   display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  background: var(--dot-color, currentColor);
+  border-radius: 50%; /* bills: circle */
+}
+
+/* Every kind of event has its own shape, so they can be told apart without relying on colour */
+.dot.kind-task {
+  border-radius: 2px; /* square */
+}
+
+.dot.kind-appointment {
+  border-radius: 1px; /* diamond */
+  transform: rotate(45deg) scale(0.8);
+}
+
+.dot.kind-document {
+  border-radius: 0; /* triangle */
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.dot.kind-subscription {
+  background: transparent; /* ring */
+  border: 2px solid var(--dot-color);
+  box-sizing: border-box;
+}
+
+/* Completed events are faded */
+.dot.done {
+  opacity: 0.4;
 }
 
 /* Month view: 7 columns; the 1px gap shows the border color as grid lines */
@@ -1108,7 +1136,9 @@ button.badge:hover {
 }
 
 .week-chip {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   border-left: 3px solid var(--border-strong);
   background: var(--surface-hover);
   border-radius: 4px;
@@ -1120,9 +1150,20 @@ button.badge:hover {
   white-space: nowrap;
 }
 
+.week-chip svg {
+  flex-shrink: 0;
+}
+
+.week-chip-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .week-chip.done-chip {
   text-decoration: line-through;
   color: var(--text-muted);
+  opacity: 0.75;
 }
 
 /* ===== Modal ===== */

@@ -34,10 +34,10 @@ export default function DashboardCharts({ bills, tasks }) {
 
   const modeToggle = (
     <div className="seg" role="group" aria-label="Category data">
-      <button type="button" className={categoryMode === 'paid' ? 'active' : ''} onClick={() => setCategoryMode('paid')}>
+      <button type="button" className={categoryMode === 'paid' ? 'active' : ''} aria-pressed={categoryMode === 'paid'} onClick={() => setCategoryMode('paid')}>
         Paid
       </button>
-      <button type="button" className={categoryMode === 'all' ? 'active' : ''} onClick={() => setCategoryMode('all')}>
+      <button type="button" className={categoryMode === 'all' ? 'active' : ''} aria-pressed={categoryMode === 'all'} onClick={() => setCategoryMode('all')}>
         All bills
       </button>
     </div>

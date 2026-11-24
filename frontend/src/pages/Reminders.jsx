@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext'
 import PageHeader from '../components/common/PageHeader'
 import StatusBadge from '../components/common/StatusBadge'
 import EmptyState from '../components/common/EmptyState'
+import Tabs, { tabPanelProps } from '../components/common/Tabs'
 import { formatDate } from '../utils/helpers'
 import { buildReminders, groupReminders } from '../utils/reminders'
 import { KIND_ICONS, KIND_TONES, dueStatus, relativeDays } from '../utils/display'
@@ -92,19 +93,16 @@ export default function Reminders() {
       />
 
       <div className="toolbar">
-        <div className="tabs">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              className={`tab ${tab === t.key ? 'active' : ''}`}
-              onClick={() => setTab(t.key)}
-            >
-              {t.label} ({groups[t.key].length})
-            </button>
-          ))}
-        </div>
+        <Tabs
+          id="reminders-tabs"
+          label="Reminder groups"
+          tabs={TABS.map((t) => ({ key: t.key, label: `${t.label} (${groups[t.key].length})` }))}
+          value={tab}
+          onChange={setTab}
+        />
       </div>
 
+      <div {...tabPanelProps('reminders-tabs', tab)}>
       {list.length === 0 ? (
         <EmptyState
           icon={tab === 'snoozed' ? BellOff : Bell}
@@ -179,6 +177,7 @@ export default function Reminders() {
           })}
         </div>
       )}
+      </div>
     </>
   )
 }

@@ -10,6 +10,7 @@ import StatusBadge from '../components/common/StatusBadge'
 import EmptyState from '../components/common/EmptyState'
 import Modal from '../components/common/Modal'
 import ItemForm from '../components/common/ItemForm'
+import Tabs, { tabPanelProps } from '../components/common/Tabs'
 import { formatDate, daysUntil, todayString } from '../utils/helpers'
 import { PRIORITIES, taskFields, appointmentFields } from '../utils/fields'
 import { useConfirm } from '../context/ConfirmContext'
@@ -123,14 +124,16 @@ export default function Tasks() {
 
       {/* Tabs + filters */}
       <div className="toolbar">
-        <div className="tabs">
-          <button className={`tab ${isTasks ? 'active' : ''}`} onClick={() => setTab('tasks')}>
-            Tasks ({pendingTasks.length} pending)
-          </button>
-          <button className={`tab ${!isTasks ? 'active' : ''}`} onClick={() => setTab('appointments')}>
-            Appointments ({pendingAppointments.length} pending)
-          </button>
-        </div>
+        <Tabs
+          id="tasks-tabs"
+          label="Tasks or appointments"
+          tabs={[
+            { key: 'tasks', label: `Tasks (${pendingTasks.length} pending)` },
+            { key: 'appointments', label: `Appointments (${pendingAppointments.length} pending)` },
+          ]}
+          value={tab}
+          onChange={setTab}
+        />
 
         <div className="toolbar-filters">
           <select className="filter-select" aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
@@ -150,6 +153,7 @@ export default function Tasks() {
         </div>
       </div>
 
+      <div {...tabPanelProps('tasks-tabs', tab)}>
       {visible.length === 0 ? (
         <EmptyState
           icon={CheckSquare}
@@ -225,6 +229,7 @@ export default function Tasks() {
           </table>
         </div>
       )}
+      </div>
 
       {/* The same modal is used for adding and editing, for both tasks and appointments */}
       <Modal isOpen={modalOpen} title={`${editingItem ? 'Edit' : 'Add'} ${noun}`} onClose={closeModal}>
