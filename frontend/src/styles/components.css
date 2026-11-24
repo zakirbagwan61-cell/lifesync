@@ -1648,3 +1648,25 @@ button.badge:hover {
 .col-check {
   width: 44px;
 }
+
+/* Very long figures: smaller type, and the text may break rather than spill out of its card */
+.stat-value,
+.stat-sub,
+.stat-label {
+  overflow-wrap: anywhere;
+}
+
+.stat-value.is-long {
+  font-size: 22px;
+}
+
+.stat-grid-compact .stat-value.is-long {
+  font-size: 20px;
+}
+
+@media (max-width: 640px) {
+  .stat-value.is-long,
+  .stat-grid-compact .stat-value.is-long {
+    font-size: 17px;
+  }
+}

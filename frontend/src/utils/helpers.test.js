@@ -164,11 +164,25 @@ describe('toDateString', () => {
 })
 
 describe('formatCurrency', () => {
-  it('formats rupees with Indian digit grouping and no decimals', () => {
+  it('formats whole rupees with Indian digit grouping and no decimals', () => {
     expect(formatCurrency(0)).toBe('₹0')
     expect(formatCurrency(1850)).toBe('₹1,850')
     expect(formatCurrency(150000)).toBe('₹1,50,000')
-    expect(formatCurrency(999.6)).toBe('₹1,000')
+    expect(formatCurrency(10000000)).toBe('₹1,00,00,000')
+  })
+
+  it('shows paise, always as two digits, when an amount has them', () => {
+    expect(formatCurrency(1234.5)).toBe('₹1,234.50')
+    expect(formatCurrency(999.6)).toBe('₹999.60')
+    expect(formatCurrency(0.05)).toBe('₹0.05')
+    expect(formatCurrency(12.34)).toBe('₹12.34')
+  })
+
+  it('rounds anything finer than paise and hides float noise in totals', () => {
+    expect(formatCurrency(12.345)).toBe('₹12.35')
+    expect(formatCurrency(0.1 + 0.2)).toBe('₹0.30')
+    expect(formatCurrency(100.004)).toBe('₹100')
+    expect(formatCurrency(1850.001 + 1)).toBe('₹1,851')
   })
 
   it('treats bad values as zero', () => {

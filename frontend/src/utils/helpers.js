@@ -4,13 +4,17 @@
 export const generateId = () =>
   Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
 
-// Format a number as Indian Rupees: 1500 -> "₹1,500"
-export const formatCurrency = (amount) =>
-  new Intl.NumberFormat('en-IN', {
+// Format a number as Indian Rupees: 1500 -> "₹1,500". Whole rupees show no decimals;
+// an amount with paise shows two: 1234.5 -> "₹1,234.50". Anything past paise is rounded.
+export const formatCurrency = (amount) => {
+  const rounded = Math.round((Number(amount) || 0) * 100) / 100
+  return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(Number(amount) || 0)
+    minimumFractionDigits: Number.isInteger(rounded) ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(rounded)
+}
 
 // Read a date-only string ("2026-11-16") as a calendar date: { y, m, d } (m is 1 to 12).
 // Returns null for anything that is not a real "YYYY-MM-DD" date.

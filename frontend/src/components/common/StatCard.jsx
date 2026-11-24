@@ -11,19 +11,21 @@ export default function StatCard({
   const isNumber = typeof value === 'number'
   const counted = useCountUp(isNumber ? value : 0, label)
   const show = (n) => (format ? format(n) : n)
+  // A long figure (for example ₹1,23,45,678) gets a smaller size so it stays inside its card.
+  const long = String(isNumber ? show(value) : value).length > 9
 
   return (
     <div className="stat-card">
       <div className={`stat-icon tone-${tone}`}>{Icon && <Icon size={22} />}</div>
       <div className="stat-body">
         {isNumber ? (
-          <div className="stat-value">
+          <div className={`stat-value${long ? ' is-long' : ''}`}>
             {/* Screen readers get the final number, not the counting one */}
             <span aria-hidden="true">{show(counted)}</span>
             <span className="sr-only">{show(value)}</span>
           </div>
         ) : (
-          <div className="stat-value">{value}</div>
+          <div className={`stat-value${long ? ' is-long' : ''}`}>{value}</div>
         )}
         <div className="stat-label">{label}</div>
         {sub && <div className="stat-sub">{sub}</div>}

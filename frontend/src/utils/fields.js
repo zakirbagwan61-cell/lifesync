@@ -1,4 +1,5 @@
 // Form field definitions used by Quick Add (the same ones the module pages use).
+import { MAX_AMOUNT, MAX_DECIMALS } from './validation'
 
 export const CATEGORIES = ['Electricity', 'Mobile', 'Internet', 'Rent', 'Other']
 export const DOC_TYPES = ['Aadhaar', 'PAN', 'Passport', 'Driving Licence', 'Insurance', 'Other']
@@ -8,7 +9,7 @@ export const PRIORITIES = ['High', 'Medium', 'Low']
 export const billFields = [
   { name: 'title', label: 'Bill name', type: 'text', required: true, maxLength: 80, placeholder: 'e.g. Electricity bill' },
   { name: 'category', label: 'Category', type: 'select', options: CATEGORIES, required: true },
-  { name: 'amount', label: 'Amount (₹)', type: 'number', required: true, positive: true },
+  { name: 'amount', label: 'Amount (₹)', type: 'number', required: true, positive: true, max: MAX_AMOUNT, decimals: MAX_DECIMALS },
   { name: 'dueDate', label: 'Due date', type: 'date', required: true },
   { name: 'recurring', label: 'Repeats every month', type: 'checkbox' },
 ]
@@ -24,7 +25,7 @@ export const documentFields = [
 
 export const subscriptionFields = [
   { name: 'name', label: 'Service name', type: 'text', required: true, maxLength: 60, placeholder: 'e.g. Netflix' },
-  { name: 'cost', label: 'Cost (₹)', type: 'number', required: true, positive: true },
+  { name: 'cost', label: 'Cost (₹)', type: 'number', required: true, positive: true, max: MAX_AMOUNT, decimals: MAX_DECIMALS },
   { name: 'cycle', label: 'Billing cycle', type: 'select', options: CYCLES, required: true },
   { name: 'nextRenewal', label: 'Next renewal date', type: 'date', required: true },
   { name: 'autoRenew', label: 'Auto-renew is on', type: 'checkbox' },

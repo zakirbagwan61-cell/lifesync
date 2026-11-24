@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useModalDirty } from './Modal'
-import { trimValues, validateFields } from '../../utils/validation'
+import { MAX_DATE, MIN_DATE, trimValues, validateFields } from '../../utils/validation'
 
 // A generic form built from a list of field definitions, so Bills, Documents,
 // Subscriptions, Tasks and Quick Add can all reuse it.
@@ -113,7 +113,9 @@ export default function ItemForm({
         value={values[f.name]}
         placeholder={f.placeholder}
         maxLength={f.maxLength}
-        min={f.type === 'number' ? 0 : undefined}
+        min={f.type === 'number' ? 0 : f.type === 'date' ? MIN_DATE : undefined}
+        max={f.type === 'number' ? f.max : f.type === 'date' ? MAX_DATE : undefined}
+        step={f.type === 'number' && f.decimals !== undefined ? 1 / 10 ** f.decimals : undefined}
       />
     )
   }

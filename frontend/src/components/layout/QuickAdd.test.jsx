@@ -59,6 +59,53 @@ describe('Quick Add', () => {
     expect(within(dialog).getByText('Amount must be greater than 0')).toBeInTheDocument()
   })
 
+  it('rejects an amount above the limit and one with more than 2 decimal places', async () => {
+    renderApp('/')
+    const dialog = await openQuickAdd()
+    await user.type(field(dialog, /bill name/i), 'Gym fees')
+    await user.selectOptions(field(dialog, /category/i), 'Other')
+
+    await user.type(field(dialog, /amount/i), '10000001')
+    await user.click(within(dialog).getByRole('button', { name: 'Add bill' }))
+    expect(within(dialog).getByText('Amount cannot be more than 1,00,00,000')).toBeInTheDocument()
+
+    await user.clear(field(dialog, /amount/i))
+    await user.type(field(dialog, /amount/i), '12.345')
+    await user.click(within(dialog).getByRole('button', { name: 'Add bill' }))
+    expect(within(dialog).getByText('Amount can have at most 2 decimal places')).toBeInTheDocument()
+    expect(readStored('lifesync_bills')).toHaveLength(4) // nothing saved
+  })
+
+  it('rejects a date outside 1900 to 2100, and the date box carries the same limits', async () => {
+    renderApp('/')
+    const dialog = await openQuickAdd()
+    expect(field(dialog, /due date/i)).toHaveAttribute('min', '1900-01-01')
+    expect(field(dialog, /due date/i)).toHaveAttribute('max', '2100-12-31')
+    expect(field(dialog, /amount/i)).toHaveAttribute('max', '10000000')
+    expect(field(dialog, /amount/i)).toHaveAttribute('step', '0.01')
+
+    await user.type(field(dialog, /bill name/i), 'Gym fees')
+    await user.selectOptions(field(dialog, /category/i), 'Other')
+    await user.type(field(dialog, /amount/i), '900')
+    await user.clear(field(dialog, /due date/i))
+    await user.type(field(dialog, /due date/i), '2150-01-01')
+    await user.click(within(dialog).getByRole('button', { name: 'Add bill' }))
+    expect(within(dialog).getByText('Due date must be between 1900 and 2100')).toBeInTheDocument()
+  })
+
+  it('accepts an amount with paise and shows it with paise on the Bills page', async () => {
+    renderApp('/')
+    const dialog = await openQuickAdd()
+    await user.type(field(dialog, /bill name/i), 'Gym fees')
+    await user.selectOptions(field(dialog, /category/i), 'Other')
+    await user.type(field(dialog, /amount/i), '1850.5')
+    await user.click(within(dialog).getByRole('button', { name: 'Add bill' }))
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(readStored('lifesync_bills').find((b) => b.title === 'Gym fees').amount).toBe(1850.5)
+    expect(await screen.findByText('₹1,850.50')).toBeInTheDocument()
+  })
+
   it('saves a valid bill, closes, opens the Bills page and logs the activity', async () => {
     renderApp('/')
     const dialog = await openQuickAdd()

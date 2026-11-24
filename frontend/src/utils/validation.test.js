@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { trimValues, validateFields } from './validation'
+import { MAX_AMOUNT, MAX_DATE, MIN_DATE, trimValues, validateFields } from './validation'
 import {
   appointmentFields, billFields, documentFields, subscriptionFields, taskFields,
 } from './fields'
@@ -80,7 +80,7 @@ describe('amounts and costs must be greater than zero', () => {
   })
 
   it('still reports a missing amount as required', () => {
-    expect(check(billFields, { ...validBill, amount: '' })).toEqual({ amount: 'Amount (₹) is required' })
+    expect(check(billFields, { ...validBill, amount: '' })).toEqual({ amount: 'Amount is required' })
   })
 
   it('applies to subscription cost with its own name in the message', () => {
@@ -151,5 +151,61 @@ describe('field limits', () => {
     expect(limit(billFields, 'title')).toBeGreaterThanOrEqual(60)
     expect(limit(documentFields, 'notes')).toBeGreaterThanOrEqual(300)
     expect(limit(documentFields, 'number')).toBeGreaterThanOrEqual(30)
+  })
+})
+
+describe('amount limits', () => {
+  it('allows the largest amount and rejects anything above it, with the limit in the message', () => {
+    expect(check(billFields, { ...validBill, amount: String(MAX_AMOUNT) })).toEqual({})
+    expect(check(billFields, { ...validBill, amount: String(MAX_AMOUNT + 1) }))
+      .toEqual({ amount: 'Amount cannot be more than 1,00,00,000' })
+    expect(check(billFields, { ...validBill, amount: '1e12' })).toEqual({ amount: 'Amount cannot be more than 1,00,00,000' })
+  })
+
+  it('applies the same limit to subscription cost', () => {
+    const sub = { name: 'Netflix', cost: '99999999', cycle: 'Monthly', nextRenewal: '2026-12-01', autoRenew: true }
+    expect(check(subscriptionFields, sub)).toEqual({ cost: 'Cost cannot be more than 1,00,00,000' })
+  })
+
+  it.each(['1850.75', '0.01', '12.5', '12.50', '99999.99', 1.15, 0.1 + 0.2])('accepts paise: %s', (amount) => {
+    expect(check(billFields, { ...validBill, amount })).toEqual({})
+  })
+
+  it.each(['12.345', '0.001', '1850.755', '9.999'])('rejects more than 2 decimal places: %s', (amount) => {
+    expect(check(billFields, { ...validBill, amount })).toEqual({ amount: 'Amount can have at most 2 decimal places' })
+  })
+
+  it('reports a negative number on a field that is not "positive" with the short label', () => {
+    const fields = [{ name: 'qty', label: 'Quantity (units)', type: 'number' }]
+    expect(validateFields(fields, { qty: '-1' })).toEqual({ qty: 'Quantity cannot be negative' })
+  })
+
+  it('supports whole-number-only fields', () => {
+    const fields = [{ name: 'days', label: 'Days', type: 'number', decimals: 0 }]
+    expect(validateFields(fields, { days: '3' })).toEqual({})
+    expect(validateFields(fields, { days: '3.5' })).toEqual({ days: 'Days must be a whole number' })
+  })
+})
+
+describe('date limits', () => {
+  it('accepts dates between 1900 and 2100, including the edges', () => {
+    expect(check(billFields, { ...validBill, dueDate: MIN_DATE })).toEqual({})
+    expect(check(billFields, { ...validBill, dueDate: MAX_DATE })).toEqual({})
+    expect(check(billFields, { ...validBill, dueDate: '2026-12-31' })).toEqual({})
+  })
+
+  it.each(['0001-01-01', '1899-12-31', '2101-01-01', '275760-09-13', '9999-12-31'])('rejects %s', (dueDate) => {
+    expect(check(billFields, { ...validBill, dueDate })).toEqual({ dueDate: 'Due date must be between 1900 and 2100' })
+  })
+
+  it('checks optional dates only when they are filled in', () => {
+    expect(check(documentFields, { ...validDoc, issueDate: '', expiryDate: '' })).toEqual({})
+    expect(check(documentFields, { ...validDoc, expiryDate: '2150-01-01' }))
+      .toEqual({ expiryDate: 'Expiry date must be between 1900 and 2100' })
+  })
+
+  it('still reports a not-before problem for in-range dates', () => {
+    expect(check(documentFields, { ...validDoc, issueDate: '2030-01-10', expiryDate: '2029-01-10' }))
+      .toEqual({ expiryDate: 'Expiry date cannot be earlier than the issue date' })
   })
 })
