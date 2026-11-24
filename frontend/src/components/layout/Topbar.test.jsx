@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { freezeToday, renderApp } from '../../test/render'
 
@@ -161,5 +161,77 @@ describe('Topbar live search', () => {
     const option = await screen.findByRole('option', { name: /passport \(asha verma\)/i })
     expect(option).not.toHaveTextContent('P1234567')
     expect(option).toHaveTextContent('••')
+  })
+
+  describe('while the next results load', () => {
+    it('keeps the previous suggestions on screen (dimmed) instead of an empty box', async () => {
+      renderApp('/')
+      await user.type(box(), 'dent')
+      await suggestion(/dentist check-up/i)
+
+      await user.type(box(), 'i') // one more letter: the new results are about to arrive
+      expect(screen.getByRole('listbox')).toHaveAttribute('aria-busy', 'true')
+      const dentist = within(list()).getByRole('option', { name: /dentist check-up/i })
+      expect(dentist).toHaveClass('is-stale')
+      expect(within(list()).getByRole('option', { name: /search all for "denti"/i })).toBeInTheDocument()
+
+      await waitFor(() => expect(screen.getByRole('listbox')).toHaveAttribute('aria-busy', 'false'))
+      expect(within(list()).getByRole('option', { name: /dentist check-up/i })).not.toHaveClass('is-stale')
+      expect(options().at(-1)).toHaveTextContent(/see all 1 result for "denti"/i)
+    })
+
+    it('shows nothing at all before the first results exist', async () => {
+      renderApp('/')
+      await user.type(box(), 'dent')
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument() // no empty frame
+      expect(box()).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    it('does not open a stale highlighted suggestion: typing again clears the highlight', async () => {
+      renderApp('/')
+      await user.type(box(), 'in')
+      await suggestions()
+      await user.keyboard('{ArrowDown}')
+      expect(box()).toHaveAttribute('aria-activedescendant', 'search-option-0')
+      await user.type(box(), 's')
+      expect(box()).not.toHaveAttribute('aria-activedescendant')
+    })
+  })
+
+  describe('leaving the search', () => {
+    it('empties the box when you move to another page', async () => {
+      renderApp('/search?q=rent')
+      expect(await screen.findByRole('heading', { level: 1, name: 'Search' })).toBeInTheDocument()
+      expect(box()).toHaveValue('rent')
+
+      await user.click(within(screen.getByRole('navigation')).getByRole('link', { name: /^bills/i }))
+      expect(await screen.findByRole('heading', { level: 1, name: 'Bills & Payments' })).toBeInTheDocument()
+      expect(box()).toHaveValue('')
+    })
+
+    it('keeps the text while you are still on the Search page', async () => {
+      renderApp('/search?q=rent')
+      await screen.findByRole('heading', { level: 1, name: 'Search' })
+      await user.clear(box())
+      await user.type(box(), 'netflix{Enter}')
+      expect(await within(screen.getByRole('main')).findByText('Netflix')).toBeInTheDocument()
+      expect(box()).toHaveValue('netflix')
+    })
+  })
+})
+
+describe('Topbar reminders bell', () => {
+  it('shows how many reminders are overdue, and updates when the day changes', async () => {
+    renderApp('/')
+    const bell = () => screen.getByRole('link', { name: /^reminders, \d+ overdue$/i })
+    expect(bell()).toHaveAccessibleName('Reminders, 3 overdue') // Mobile recharge, Call insurance agent, Insurance
+
+    // overnight: the same open tab, the next morning
+    vi.setSystemTime(new Date(2026, 10, 25, 8, 0, 0))
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+    // now also overdue: Electricity bill, Buy groceries, Team meeting, Dentist check-up
+    await waitFor(() => expect(bell()).toHaveAccessibleName('Reminders, 7 overdue'))
   })
 })

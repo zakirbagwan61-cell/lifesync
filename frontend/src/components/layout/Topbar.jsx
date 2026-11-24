@@ -4,6 +4,7 @@ import { Menu, Search, Plus, Moon, Sun, Bell } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import useTheme from '../../hooks/useTheme'
 import useDebouncedValue from '../../hooks/useDebouncedValue'
+import useToday from '../../hooks/useToday'
 import { buildReminders, groupReminders } from '../../utils/reminders'
 import { buildSearchItems, filterSearchItems, rankSearchResults, searchItemPath } from '../../utils/search'
 import { KIND_ICONS, KIND_TONES } from '../../utils/display'
@@ -40,10 +41,18 @@ export default function Topbar({ onMenuClick, onQuickAdd }) {
       setQuery(new URLSearchParams(location.search).get('q') || '')
     }
   }, [location.pathname, location.search])
+  // Moving on to another page empties the box, so an old search does not follow you around.
+  useEffect(() => {
+    if (location.pathname !== '/search') {
+      setQuery('')
+      setOpen(false)
+    }
+  }, [location.pathname])
   const { theme, toggleTheme } = useTheme()
   const { bills, documents, subscriptions, tasks, appointments, snoozes } = useApp()
 
   // The bell shows how many reminders are overdue (read-only: nothing is changed here).
+  useToday() // re-renders at midnight, so the count is not left showing yesterday's number
   const overdue = groupReminders(
     buildReminders({ bills, documents, subscriptions, tasks, appointments }),
     snoozes
@@ -62,6 +71,10 @@ export default function Topbar({ onMenuClick, onQuickAdd }) {
   const suggestions = allMatches.slice(0, MAX_SUGGESTIONS)
   const waiting = query.trim() !== debounced // the user is still typing
   const listVisible = open && query.trim().length >= MIN_CHARS
+  // While the next results load, the previous ones stay on screen (dimmed) instead of an empty box.
+  // Before the very first results exist there is nothing to show yet.
+  const settled = debounced.length >= MIN_CHARS
+  const showList = listVisible && (!waiting || settled)
   const seeAllIndex = suggestions.length
 
   useEffect(() => setActive(-1), [debounced])
@@ -125,21 +138,21 @@ export default function Topbar({ onMenuClick, onQuickAdd }) {
           placeholder={compact ? 'Search...' : 'Search bills, documents, tasks...'}
           aria-label="Search bills, documents, tasks"
           role="combobox"
-          aria-expanded={listVisible}
+          aria-expanded={showList}
           aria-controls="search-suggestions"
           aria-autocomplete="list"
-          aria-activedescendant={listVisible && active >= 0 ? `search-option-${active}` : undefined}
+          aria-activedescendant={showList && active >= 0 ? `search-option-${active}` : undefined}
           autoComplete="off"
           value={query}
-          onChange={(e) => { setQuery(e.target.value); setOpen(true) }}
+          onChange={(e) => { setQuery(e.target.value); setOpen(true); setActive(-1) }}
           onFocus={() => { if (query.trim()) setOpen(true) }}
           onKeyDown={handleKeyDown}
         />
 
-        {listVisible && (
+        {showList && (
           <div className="search-suggest">
-            <ul id="search-suggestions" role="listbox" aria-label="Search suggestions">
-              {!waiting && suggestions.map((r, i) => {
+            <ul id="search-suggestions" role="listbox" aria-label="Search suggestions" aria-busy={waiting}>
+              {suggestions.map((r, i) => {
                 const Icon = KIND_ICONS[r.kind]
                 return (
                   // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- combobox options are driven from the input (arrows + Enter)
@@ -148,7 +161,7 @@ export default function Topbar({ onMenuClick, onQuickAdd }) {
                     id={`search-option-${i}`}
                     role="option"
                     aria-selected={active === i}
-                    className={`suggest-row${active === i ? ' active' : ''}`}
+                    className={`suggest-row${active === i ? ' active' : ''}${waiting ? ' is-stale' : ''}`}
                     onMouseDown={(e) => e.preventDefault()} // keep focus in the input
                     onClick={() => openItem(r)}
                     onMouseEnter={() => setActive(i)}
@@ -161,20 +174,18 @@ export default function Topbar({ onMenuClick, onQuickAdd }) {
                   </li>
                 )
               })}
-              {!waiting && (
-                // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- combobox option, driven from the input
-                <li
-                  id={`search-option-${seeAllIndex}`}
-                  role="option"
-                  aria-selected={active === seeAllIndex}
-                  className={`suggest-row suggest-all${active === seeAllIndex ? ' active' : ''}`}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={seeAll}
-                  onMouseEnter={() => setActive(seeAllIndex)}
-                >
-                  {seeAllText}
-                </li>
-              )}
+              {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events -- combobox option, driven from the input */}
+              <li
+                id={`search-option-${seeAllIndex}`}
+                role="option"
+                aria-selected={active === seeAllIndex}
+                className={`suggest-row suggest-all${active === seeAllIndex ? ' active' : ''}`}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={seeAll}
+                onMouseEnter={() => setActive(seeAllIndex)}
+              >
+                {waiting ? `Search all for "${query.trim()}"` : seeAllText}
+              </li>
             </ul>
             <span className="sr-only" role="status">
               {waiting ? '' : allMatches.length === 0 ? 'No suggestions' : `${allMatches.length} suggestion${allMatches.length === 1 ? '' : 's'} available`}

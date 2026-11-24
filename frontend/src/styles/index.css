@@ -12,7 +12,6 @@
 
   /* Brand */
   --primary: #0d9488;
-  --primary-dark: #0f766e; /* hover */
   --primary-soft: #e6fffb; /* "Primary Light" */
   --primary-text: #0f766e; /* teal that is readable as text on light surfaces */
   --primary-ring: rgba(13, 148, 136, 0.22);
@@ -63,7 +62,6 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
-  --space-10: 40px;
   --space-12: 48px;
 
   /* Radius */
@@ -76,7 +74,6 @@
   --shadow-sm: 0 1px 2px rgba(18, 52, 59, 0.05), 0 1px 3px rgba(18, 52, 59, 0.04);
   --shadow-md: 0 4px 14px rgba(18, 52, 59, 0.08);
   --shadow-lg: 0 18px 44px rgba(18, 52, 59, 0.18);
-  --shadow: var(--shadow-sm);
   --overlay: rgba(10, 28, 31, 0.5);
 
   /* Layout */
@@ -112,7 +109,6 @@
   color-scheme: dark;
 
   --primary: #2dd4bf;
-  --primary-dark: #5eead4; /* hover */
   --primary-soft: #123f3c;
   --primary-text: #5eead4;
   --primary-ring: rgba(45, 212, 191, 0.3);
