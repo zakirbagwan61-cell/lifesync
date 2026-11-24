@@ -4,6 +4,7 @@ import Sidebar from './Sidebar'
 import Topbar from './Topbar'
 import QuickAdd from './QuickAdd'
 import useRouteAccessibility from '../../hooks/useRouteAccessibility'
+import ErrorBoundary from '../common/ErrorBoundary'
 
 // The shell shown on every page: sidebar + topbar, and the current page inside <Outlet />.
 export default function AppLayout() {
@@ -33,7 +34,10 @@ export default function AppLayout() {
         <main className="page" id="main-content" tabIndex={-1}>
           {/* Keyed by route so each page fades in gently when you navigate */}
           <div className="page-content" key={location.pathname}>
-            <Outlet />
+            {/* One broken page shows a message here while the menu keeps working */}
+            <ErrorBoundary compact resetKey={location.pathname}>
+              <Outlet />
+            </ErrorBoundary>
           </div>
         </main>
       </div>

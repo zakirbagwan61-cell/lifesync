@@ -145,7 +145,7 @@ export default function Subscriptions() {
                 <th>Cost</th>
                 <th>Next renewal</th>
                 <th>Auto-renew</th>
-                <th></th>
+                <th><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody>
@@ -173,6 +173,8 @@ export default function Subscriptions() {
                         className={`badge tone-${sub.autoRenew ? 'success' : 'neutral'}`}
                         style={{ border: 'none' }}
                         title="Click to toggle auto-renew"
+                        aria-label={`Auto-renew for ${sub.name}`}
+                        aria-pressed={sub.autoRenew}
                         onClick={() => updateSubscription(sub.id, { autoRenew: !sub.autoRenew })}
                       >
                         {sub.autoRenew ? 'On' : 'Off'}
@@ -183,10 +185,10 @@ export default function Subscriptions() {
                         <button className="icon-btn" title="Mark as renewed" aria-label={`Mark ${sub.name} as renewed`} onClick={() => handleRenew(sub)}>
                           <RefreshCw size={18} />
                         </button>
-                        <button className="icon-btn" title="Edit" onClick={() => openEdit(sub)}>
+                        <button className="icon-btn" title="Edit" aria-label={`Edit ${sub.name}`} onClick={() => openEdit(sub)}>
                           <Pencil size={18} />
                         </button>
-                        <button className="icon-btn" title="Delete" onClick={() => handleDelete(sub)}>
+                        <button className="icon-btn" title="Delete" aria-label={`Delete ${sub.name}`} onClick={() => handleDelete(sub)}>
                           <Trash2 size={18} />
                         </button>
                       </div>

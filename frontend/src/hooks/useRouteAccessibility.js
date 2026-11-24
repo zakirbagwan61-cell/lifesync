@@ -24,8 +24,9 @@ export default function useRouteAccessibility() {
   const previous = useRef(null)
 
   useEffect(() => {
-    const title = TITLES[pathname]
-    document.title = title ? `${title} | LifeSync` : 'LifeSync'
+    // A trailing slash ("/bills/") is the same page as "/bills"; anything unknown is the 404 page
+    const title = TITLES[pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname] || 'Page not found'
+    document.title = `${title} | LifeSync`
 
     if (previous.current !== null && previous.current !== pathname) {
       const heading = document.querySelector('main h1')

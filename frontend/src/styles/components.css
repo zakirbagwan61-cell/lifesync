@@ -216,13 +216,18 @@
     box-shadow 220ms ease;
 }
 
-/* Hover lift only on devices that really hover (not on touch screens) */
+/* Hover effects only on devices that really hover (not on touch screens).
+   Document cards hold buttons, so they lift slightly. Stat cards are not clickable,
+   so they only get the softer border and shadow change, with no movement. */
 @media (hover: hover) {
   .stat-card:hover,
   .doc-card:hover {
-    transform: translateY(-3px);
     border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
     box-shadow: var(--shadow-lift);
+  }
+
+  .doc-card:hover {
+    transform: translateY(-3px);
   }
 }
 
@@ -250,7 +255,7 @@
 
 .stat-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* numbers line up across a row of cards, even when one card has extra content */
   gap: var(--space-4);
   padding: var(--space-5);
   min-width: 0;
@@ -1369,11 +1374,16 @@ button.badge:hover {
 }
 
 @media (max-width: 560px) {
+  /* Compact stat cards on phones (icon beside the number) so the list starts higher on the page */
   .stat-card {
-    flex-direction: column;
-    align-items: flex-start;
     gap: var(--space-3);
-    padding: var(--space-4);
+    padding: var(--space-3);
+  }
+
+  .stat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
   }
 
   .stat-grid {
@@ -1381,7 +1391,7 @@ button.badge:hover {
   }
 
   .stat-value {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .panel {

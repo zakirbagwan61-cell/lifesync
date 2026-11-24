@@ -2,6 +2,7 @@ import { createContext, useContext } from 'react'
 import useLocalStorage from '../hooks/useLocalStorage'
 import { generateId, todayString, addDays, addMonths } from '../utils/helpers'
 import { reopenBillInList } from '../utils/bills'
+import { isPlainObject, isRecordList, isText } from '../utils/storage'
 
 // Context = one shared store that every page can read from.
 // Phase 3 added bills, 4 documents, 5 subscriptions, 6 tasks + appointments,
@@ -71,14 +72,14 @@ function createSeedAppointments() {
 const docLabel = (d) => (d ? `${d.type} (${d.holder})` : 'Document')
 
 export function AppProvider({ children }) {
-  const [userName, setUserName] = useLocalStorage('lifesync_user', 'Friend')
-  const [bills, setBills] = useLocalStorage('lifesync_bills', createSeedBills())
-  const [documents, setDocuments] = useLocalStorage('lifesync_documents', createSeedDocuments())
-  const [subscriptions, setSubscriptions] = useLocalStorage('lifesync_subscriptions', createSeedSubscriptions())
-  const [tasks, setTasks] = useLocalStorage('lifesync_tasks', createSeedTasks())
-  const [appointments, setAppointments] = useLocalStorage('lifesync_appointments', createSeedAppointments())
-  const [activity, setActivity] = useLocalStorage('lifesync_activity', [])
-  const [snoozes, setSnoozes] = useLocalStorage('lifesync_snoozes', {})
+  const [userName, setUserName] = useLocalStorage('lifesync_user', 'Friend', isText)
+  const [bills, setBills] = useLocalStorage('lifesync_bills', createSeedBills(), isRecordList)
+  const [documents, setDocuments] = useLocalStorage('lifesync_documents', createSeedDocuments(), isRecordList)
+  const [subscriptions, setSubscriptions] = useLocalStorage('lifesync_subscriptions', createSeedSubscriptions(), isRecordList)
+  const [tasks, setTasks] = useLocalStorage('lifesync_tasks', createSeedTasks(), isRecordList)
+  const [appointments, setAppointments] = useLocalStorage('lifesync_appointments', createSeedAppointments(), isRecordList)
+  const [activity, setActivity] = useLocalStorage('lifesync_activity', [], isRecordList)
+  const [snoozes, setSnoozes] = useLocalStorage('lifesync_snoozes', {}, isPlainObject)
 
   // ----- Activity log -----
   // type: bill | document | subscription | task | appointment

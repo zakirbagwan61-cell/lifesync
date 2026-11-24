@@ -32,6 +32,11 @@ export default function DashboardCharts({ bills, tasks }) {
   const statusTotal = status.paid + status.pending + status.overdue
   const taskPoints = taskData.data.reduce((sum, d) => sum + d.completed + d.pending, 0)
 
+  // With very little history a chart can look empty or lopsided, so say so instead of leaving it unexplained.
+  const spendingMonths = spending.data.filter((d) => d.value > 0).length
+  const taskMonths = taskData.data.filter((d) => d.completed + d.pending > 0).length
+  const joinNotes = (...notes) => notes.filter(Boolean).join(' ') || null
+
   const modeToggle = (
     <div className="seg" role="group" aria-label="Category data">
       <button type="button" className={categoryMode === 'paid' ? 'active' : ''} aria-pressed={categoryMode === 'paid'} onClick={() => setCategoryMode('paid')}>
@@ -51,7 +56,10 @@ export default function DashboardCharts({ bills, tasks }) {
         subtitle="Bills paid in the last 6 months"
         empty={spendingTotal === 0}
         emptyText="Mark a bill as paid and your monthly spending will appear here."
-        note={spending.hidden > 0 ? `${plural(spending.hidden, 'older payment')} not shown` : null}
+        note={joinNotes(
+          spendingMonths === 1 && 'Only one month of payments so far. The trend fills in as you pay more bills.',
+          spending.hidden > 0 && `${plural(spending.hidden, 'older payment')} not shown`
+        )}
       >
         <AreaChart
           data={spending.data}
@@ -67,6 +75,7 @@ export default function DashboardCharts({ bills, tasks }) {
         action={modeToggle}
         empty={categories.length === 0}
         emptyText={categoryMode === 'paid' ? 'Paid bills will be grouped by category here.' : 'Add a bill to see it grouped by category.'}
+        note={categoryMode === 'paid' && categories.length === 1 ? 'Only one category so far. Choose "All bills" to include bills still to pay.' : null}
       >
         <DonutChart
           slices={categories.map((c, i) => ({ ...c, color: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }))}
@@ -84,7 +93,10 @@ export default function DashboardCharts({ bills, tasks }) {
         subtitle="Completed tasks by month done, pending tasks by month due"
         empty={taskPoints === 0}
         emptyText="Add tasks and complete them to compare progress over time."
-        note={taskData.hidden > 0 ? `${plural(taskData.hidden, 'task')} outside this range not shown` : null}
+        note={joinNotes(
+          taskMonths === 1 && 'Only one month of tasks so far. The chart fills in as you plan and complete more.',
+          taskData.hidden > 0 && `${plural(taskData.hidden, 'task')} outside this range not shown`
+        )}
       >
         <BarChart data={taskData.data} ariaLabel="Completed and pending tasks per month" />
       </ChartCard>

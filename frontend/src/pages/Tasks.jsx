@@ -186,11 +186,11 @@ export default function Tasks() {
           <table className="table">
             <thead>
               <tr>
-                <th></th>
+                <th><span className="sr-only">Done</span></th>
                 <th>{isTasks ? 'Task' : 'Appointment'}</th>
                 {isTasks ? <th>Priority</th> : <th>Location</th>}
                 <th>{isTasks ? 'Deadline' : 'Date & time'}</th>
-                <th></th>
+                <th><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody>
@@ -204,6 +204,7 @@ export default function Tasks() {
                       <button
                         className={`check-btn ${item.completed ? 'done' : ''}`}
                         title={item.completed ? 'Mark as pending' : 'Mark as done'}
+                        aria-label={`${item.completed ? 'Mark as pending' : 'Mark as done'}: ${item.title}`}
                         onClick={toggle}
                       >
                         {item.completed ? <CheckCircle size={22} /> : <Circle size={22} />}
@@ -230,10 +231,10 @@ export default function Tasks() {
                     </td>
                     <td>
                       <div className="row-actions">
-                        <button className="icon-btn" title="Edit" onClick={() => openEdit(item)}>
+                        <button className="icon-btn" title="Edit" aria-label={`Edit ${item.title}`} onClick={() => openEdit(item)}>
                           <Pencil size={18} />
                         </button>
-                        <button className="icon-btn" title="Delete" onClick={() => handleDelete(item)}>
+                        <button className="icon-btn" title="Delete" aria-label={`Delete ${item.title}`} onClick={() => handleDelete(item)}>
                           <Trash2 size={18} />
                         </button>
                       </div>

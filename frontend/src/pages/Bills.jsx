@@ -168,7 +168,7 @@ export default function Bills() {
                 <th>Amount</th>
                 <th>{tab === 'history' ? 'Paid on' : 'Due date'}</th>
                 <th>Status</th>
-                <th></th>
+                <th><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody>

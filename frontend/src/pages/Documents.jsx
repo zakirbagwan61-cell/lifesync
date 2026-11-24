@@ -179,10 +179,10 @@ export default function Documents() {
                 {doc.notes && <div className="doc-notes">{doc.notes}</div>}
 
                 <div className="row-actions">
-                  <button className="icon-btn" title="Edit" onClick={() => openEdit(doc)}>
+                  <button className="icon-btn" title="Edit" aria-label={`Edit ${doc.type} (${doc.holder})`} onClick={() => openEdit(doc)}>
                     <Pencil size={18} />
                   </button>
-                  <button className="icon-btn" title="Delete" onClick={() => handleDelete(doc)}>
+                  <button className="icon-btn" title="Delete" aria-label={`Delete ${doc.type} (${doc.holder})`} onClick={() => handleDelete(doc)}>
                     <Trash2 size={18} />
                   </button>
                 </div>

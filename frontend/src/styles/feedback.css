@@ -160,3 +160,10 @@ h1[tabindex='-1']:focus {
 .tab-hint {
   margin: calc(var(--space-2) * -1) 0 var(--space-4);
 }
+
+/* A page that crashed, shown inside the layout (the menu and top bar still work) */
+.error-inline {
+  display: grid;
+  place-items: center;
+  padding: var(--space-8) 0;
+}
