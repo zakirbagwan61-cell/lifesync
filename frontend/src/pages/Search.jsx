@@ -78,7 +78,7 @@ export default function Search() {
 
       {query && (
         <div className="toolbar">
-          <select className="filter-select" value={kindFilter} onChange={(e) => setKindFilter(e.target.value)}>
+          <select className="filter-select" aria-label="Filter results by type" value={kindFilter} onChange={(e) => setKindFilter(e.target.value)}>
             <option value="All">All types ({results.length})</option>
             {Object.keys(KIND_LABELS).map((k) => (
               <option key={k} value={k}>

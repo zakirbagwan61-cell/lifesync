@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react'
 import useLocalStorage from '../hooks/useLocalStorage'
 import { generateId, todayString, addDays, addMonths } from '../utils/helpers'
+import { reopenBillInList } from '../utils/bills'
 
 // Context = one shared store that every page can read from.
 // Phase 3 added bills, 4 documents, 5 subscriptions, 6 tasks + appointments,
@@ -149,6 +150,16 @@ export function AppProvider({ children }) {
     logActivity('bill', 'paid', bill.title)
   }
 
+  // Turn a paid bill back into a pending one ("Undo" after paying, or "Reopen" in payment history).
+  // The list change is a pure function (utils/bills.js) that also removes the automatic next-month
+  // copy of a recurring bill when it is still untouched. The title for the log is read from the
+  // list we have; if this runs from an Undo button the list may be a moment old, which is fine.
+  const reopenBill = (id) => {
+    const bill = bills.find((b) => b.id === id)
+    setBills((prev) => reopenBillInList(prev, id))
+    logActivity('bill', 'reopened', bill?.title || 'Bill')
+  }
+
   // ----- Document actions -----
   const addDocument = (data) => {
     setDocuments((prev) => [...prev, { ...data, id: generateId() }])
@@ -277,6 +288,7 @@ export function AppProvider({ children }) {
     updateBill,
     deleteBill,
     markBillPaid,
+    reopenBill,
     documents,
     addDocument,
     updateDocument,

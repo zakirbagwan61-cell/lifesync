@@ -34,7 +34,11 @@ export function ConfirmProvider({ children }) {
           <button className="btn-secondary" onClick={() => close(false)}>
             Cancel
           </button>
-          <button className="btn-danger btn-danger-fill" onClick={() => close(true)}>
+          {/* variant "primary" is for safe, reversible confirmations (for example reopening a bill) */}
+          <button
+            className={options?.variant === 'primary' ? 'btn-primary' : 'btn-danger btn-danger-fill'}
+            onClick={() => close(true)}
+          >
             {options?.confirmLabel || 'Delete'}
           </button>
         </div>

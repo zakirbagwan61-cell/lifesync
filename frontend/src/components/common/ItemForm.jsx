@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { useModalDirty } from './Modal'
 
 // A generic form built from a list of field definitions, so Bills, Documents,
 // Subscriptions, Tasks and Quick Add can all reuse it.
@@ -49,6 +50,13 @@ export default function ItemForm({
 }) {
   const [values, setValues] = useState(() => buildInitialValues(fields, initialValues))
   const [errors, setErrors] = useState({})
+  const formRef = useRef(null)
+
+  // Tell the surrounding Modal (if any) when something has been typed, so it can
+  // ask before throwing the changes away.
+  const startValues = useRef(null)
+  if (startValues.current === null) startValues.current = buildInitialValues(fields, initialValues)
+  useModalDirty(fields.some((f) => String(values[f.name]) !== String(startValues.current[f.name])))
 
   // Update one field as the user types.
   const handleChange = (field, e) => {
@@ -61,7 +69,12 @@ export default function ItemForm({
     e.preventDefault() // stop the browser from reloading the page
     const foundErrors = validate(fields, values)
     setErrors(foundErrors)
-    if (Object.keys(foundErrors).length > 0) return // stay on the form and show errors
+    if (Object.keys(foundErrors).length > 0) {
+      // Stay on the form, show the errors and put the cursor in the first field that needs fixing
+      const firstInvalid = fields.find((f) => foundErrors[f.name])
+      formRef.current?.elements.namedItem(firstInvalid.name)?.focus()
+      return
+    }
 
     // Convert number fields from text ("500") to real numbers (500) before returning.
     const cleaned = { ...values }
@@ -77,6 +90,8 @@ export default function ItemForm({
       name: f.name,
       onChange: (e) => handleChange(f, e),
       'aria-invalid': errors[f.name] ? 'true' : undefined, // tells screen readers the field has an error
+      'aria-describedby': errors[f.name] ? `${f.name}-error` : undefined, // reads the message with the field
+      'aria-required': f.required && f.type !== 'checkbox' ? 'true' : undefined,
     }
 
     if (f.type === 'select') {
@@ -109,7 +124,7 @@ export default function ItemForm({
   }
 
   return (
-    <form className="form" onSubmit={handleSubmit} noValidate>
+    <form className="form" ref={formRef} onSubmit={handleSubmit} noValidate>
       {fields.map((f) => (
         <div key={f.name} className={`form-field ${errors[f.name] ? 'has-error' : ''}`}>
           {f.type === 'checkbox' ? (
@@ -126,7 +141,9 @@ export default function ItemForm({
               {renderInput(f)}
             </>
           )}
-          {errors[f.name] && <div className="form-error" role="alert">{errors[f.name]}</div>}
+          {errors[f.name] && (
+            <div className="form-error" id={`${f.name}-error`} role="alert">{errors[f.name]}</div>
+          )}
         </div>
       ))}
 

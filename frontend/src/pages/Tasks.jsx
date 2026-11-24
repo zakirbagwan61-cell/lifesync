@@ -133,14 +133,14 @@ export default function Tasks() {
         </div>
 
         <div className="toolbar-filters">
-          <select className="filter-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <select className="filter-select" aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="pending">Pending</option>
             <option value="completed">Completed</option>
             <option value="all">All</option>
           </select>
 
           {isTasks && (
-            <select className="filter-select" value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
+            <select className="filter-select" aria-label="Filter by priority" value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
               <option value="All">All priorities</option>
               {PRIORITIES.map((p) => (
                 <option key={p} value={p}>{p}</option>

@@ -1,0 +1,138 @@
+/* =====================================================================
+   LifeSync accessibility and feedback pieces: skip link, programmatic focus,
+   undo toast and the "discard changes?" prompt inside modals.
+   Colors come from the theme tokens, so light and dark both work.
+   ===================================================================== */
+
+/* ===== Skip to content: hidden until a keyboard user tabs to it ===== */
+.skip-link {
+  position: fixed;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 100;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--btn-primary-bg);
+  color: var(--on-primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-250%);
+  transition: transform 160ms var(--ease-out);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* The main area and page headings receive focus from code after navigation.
+   They are not controls, so no focus ring is drawn on them. */
+main:focus,
+h1[tabindex='-1']:focus {
+  outline: none;
+}
+
+/* ===== Undo toast ===== */
+.toast-region {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-6);
+  z-index: 70;
+  width: min(92vw, 440px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  background: var(--secondary);
+  color: #ffffff;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  font-size: 14px;
+  pointer-events: auto;
+  animation: toast-in 240ms var(--ease-out) both;
+}
+
+:root[data-theme='dark'] .toast {
+  background: var(--surface-elevated);
+  color: var(--text-heading);
+  border-color: var(--border-strong);
+}
+
+.toast-message {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.toast-action {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 var(--space-3);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  color: var(--accent);
+  transition: background-color var(--ease);
+}
+
+.toast-action:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.toast-close {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  opacity: 0.75;
+  transition: opacity var(--ease), background-color var(--ease);
+}
+
+.toast-close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+:root[data-theme='dark'] .toast-action {
+  color: var(--primary);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* ===== "Discard unsaved changes?" prompt shown inside a modal ===== */
+.discard-prompt h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+.discard-prompt p {
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.discard-prompt .form-actions {
+  margin-top: var(--space-5);
+}
+
+@media (max-width: 560px) {
+  .toast-region {
+    bottom: var(--space-4);
+  }
+}

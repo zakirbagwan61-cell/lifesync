@@ -40,7 +40,7 @@ export default function Activity() {
       />
 
       <div className="toolbar">
-        <select className="filter-select" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+        <select className="filter-select" aria-label="Filter by activity type" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
           <option value="All">All activity</option>
           {TYPES.map((t) => (
             <option key={t} value={t}>

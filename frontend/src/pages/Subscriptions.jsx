@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Plus, Pencil, Trash2, RefreshCw, Repeat, IndianRupee, CalendarClock, Layers } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import PageHeader from '../components/common/PageHeader'
@@ -10,6 +10,7 @@ import { formatCurrency, formatDate, daysUntil } from '../utils/helpers'
 
 import { CYCLES, subscriptionFields } from '../utils/fields'
 import { useConfirm } from '../context/ConfirmContext'
+import { useToast } from '../context/ToastContext'
 
 // A subscription is "renewing soon" when it renews within this many days.
 const SOON_DAYS = 7
@@ -38,6 +39,11 @@ export default function Subscriptions() {
     renewSubscription,
   } = useApp()
   const confirm = useConfirm()
+  const toast = useToast()
+
+  // An Undo button can be pressed a few seconds later, so it reads the newest function from here.
+  const latest = useRef({})
+  latest.current = { updateSubscription }
 
   const [cycleFilter, setCycleFilter] = useState('All')
   const [modalOpen, setModalOpen] = useState(false)
@@ -69,6 +75,17 @@ export default function Subscriptions() {
     closeModal()
   }
 
+  // Renewing moves the date forward in one click, so it offers Undo. Undo puts the exact
+  // previous date back (adding and subtracting months could shift a date like 31 Jan).
+  const handleRenew = (sub) => {
+    const previousDate = sub.nextRenewal
+    renewSubscription(sub.id)
+    toast({
+      message: `"${sub.name}" marked as renewed`,
+      onAction: () => latest.current.updateSubscription(sub.id, { nextRenewal: previousDate }),
+    })
+  }
+
     const handleDelete = async (sub) => {
     const ok = await confirm({ title: 'Delete subscription', message: `Delete "${sub.name}"? This cannot be undone.` })
     if (ok) deleteSubscription(sub.id)
@@ -94,7 +111,7 @@ export default function Subscriptions() {
       </div>
 
       <div className="toolbar">
-        <select className="filter-select" value={cycleFilter} onChange={(e) => setCycleFilter(e.target.value)}>
+        <select className="filter-select" aria-label="Filter by billing cycle" value={cycleFilter} onChange={(e) => setCycleFilter(e.target.value)}>
           <option value="All">All billing cycles</option>
           {CYCLES.map((c) => (
             <option key={c} value={c}>{c}</option>
@@ -157,7 +174,7 @@ export default function Subscriptions() {
                     </td>
                     <td>
                       <div className="row-actions">
-                        <button className="icon-btn" title="Mark as renewed" onClick={() => renewSubscription(sub.id)}>
+                        <button className="icon-btn" title="Mark as renewed" aria-label={`Mark ${sub.name} as renewed`} onClick={() => handleRenew(sub)}>
                           <RefreshCw size={18} />
                         </button>
                         <button className="icon-btn" title="Edit" onClick={() => openEdit(sub)}>

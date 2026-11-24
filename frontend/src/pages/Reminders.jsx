@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Bell, BellOff } from 'lucide-react'
 import { useApp } from '../context/AppContext'
@@ -8,6 +8,7 @@ import EmptyState from '../components/common/EmptyState'
 import { formatDate } from '../utils/helpers'
 import { buildReminders, groupReminders } from '../utils/reminders'
 import { KIND_ICONS, KIND_TONES, dueStatus, relativeDays } from '../utils/display'
+import { useToast } from '../context/ToastContext'
 
 const TABS = [
   { key: 'overdue', label: 'Overdue' },
@@ -24,12 +25,25 @@ const DONE_LABEL = {
   subscription: 'Mark renewed',
 }
 
+// What the Undo message says after each action.
+const DONE_MESSAGE = {
+  bill: 'marked as paid',
+  task: 'marked as done',
+  appointment: 'marked as done',
+  subscription: 'marked as renewed',
+}
+
 export default function Reminders() {
   const {
     bills, documents, subscriptions, tasks, appointments, snoozes,
     snoozeReminder, unsnoozeReminder,
-    markBillPaid, toggleTask, toggleAppointment, renewSubscription,
+    markBillPaid, reopenBill, toggleTask, toggleAppointment, renewSubscription, updateSubscription,
   } = useApp()
+  const toast = useToast()
+
+  // An Undo button can be pressed a few seconds later, so it reads the newest functions from here.
+  const latest = useRef({})
+  latest.current = { reopenBill, toggleTask, toggleAppointment, updateSubscription, unsnoozeReminder }
 
   const [tab, setTab] = useState('upcoming')
 
@@ -41,11 +55,33 @@ export default function Reminders() {
   const list = tab === 'completed' ? groups.completed.slice(0, 50) : groups[tab]
 
   // Run the right action in the right module when the user finishes a reminder.
+  // Every one of these is a single click, so each offers Undo.
   const markDone = (r) => {
-    if (r.kind === 'bill') markBillPaid(r.sourceId)
-    else if (r.kind === 'task') toggleTask(r.sourceId)
-    else if (r.kind === 'appointment') toggleAppointment(r.sourceId)
-    else if (r.kind === 'subscription') renewSubscription(r.sourceId)
+    let undo
+    if (r.kind === 'bill') {
+      markBillPaid(r.sourceId)
+      undo = () => latest.current.reopenBill(r.sourceId)
+    } else if (r.kind === 'task') {
+      toggleTask(r.sourceId)
+      undo = () => latest.current.toggleTask(r.sourceId) // toggling again puts it back to pending
+    } else if (r.kind === 'appointment') {
+      toggleAppointment(r.sourceId)
+      undo = () => latest.current.toggleAppointment(r.sourceId)
+    } else if (r.kind === 'subscription') {
+      const previousDate = subscriptions.find((s) => s.id === r.sourceId)?.nextRenewal
+      renewSubscription(r.sourceId)
+      undo = () => latest.current.updateSubscription(r.sourceId, { nextRenewal: previousDate })
+    } else return
+    toast({ message: `"${r.title}" ${DONE_MESSAGE[r.kind]}`, onAction: undo })
+  }
+
+  // Snoozing hides a reminder for a while; Undo brings it straight back.
+  const snooze = (r, days) => {
+    snoozeReminder(r.id, days)
+    toast({
+      message: `"${r.title}" snoozed for ${days === 7 ? '1 week' : `${days} day${days === 1 ? '' : 's'}`}`,
+      onAction: () => latest.current.unsnoozeReminder(r.id),
+    })
   }
 
   return (
@@ -127,8 +163,9 @@ export default function Reminders() {
 
                     <select
                       className="filter-select btn-small"
+                      aria-label={`Snooze duration for ${r.title}`}
                       value=""
-                      onChange={(e) => e.target.value && snoozeReminder(r.id, Number(e.target.value))}
+                      onChange={(e) => e.target.value && snooze(r, Number(e.target.value))}
                     >
                       <option value="">Snooze</option>
                       <option value="1">1 day</option>

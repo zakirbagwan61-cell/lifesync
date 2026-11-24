@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Plus, Pencil, Trash2, CheckCircle, Receipt, Clock, AlertTriangle, IndianRupee } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { Plus, Pencil, Trash2, CheckCircle, Receipt, Clock, AlertTriangle, IndianRupee, RotateCcw } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import PageHeader from '../components/common/PageHeader'
 import StatCard from '../components/common/StatCard'
@@ -11,6 +11,7 @@ import { formatCurrency, formatDate, daysUntil } from '../utils/helpers'
 
 import { CATEGORIES, billFields } from '../utils/fields'
 import { useConfirm } from '../context/ConfirmContext'
+import { useToast } from '../context/ToastContext'
 
 // Work out which badge a bill should show.
 function getStatus(bill) {
@@ -22,8 +23,13 @@ function getStatus(bill) {
 }
 
 export default function Bills() {
-  const { bills, addBill, updateBill, deleteBill, markBillPaid } = useApp()
+  const { bills, addBill, updateBill, deleteBill, markBillPaid, reopenBill } = useApp()
     const confirm = useConfirm()
+  const toast = useToast()
+
+  // An Undo button can be pressed a few seconds later, so it reads the newest function from here.
+  const latest = useRef({})
+  latest.current = { reopenBill }
 
   const [tab, setTab] = useState('upcoming') // 'upcoming' | 'history'
   const [category, setCategory] = useState('All')
@@ -60,6 +66,28 @@ export default function Bills() {
     if (editingBill) updateBill(editingBill.id, values)
     else addBill(values)
     closeModal()
+  }
+
+  // Paying is one click, so it offers Undo (which also removes the automatic next-month copy of a recurring bill).
+  const handleMarkPaid = (bill) => {
+    markBillPaid(bill.id)
+    toast({
+      message: `"${bill.title}" marked as paid`,
+      onAction: () => latest.current.reopenBill(bill.id),
+    })
+  }
+
+  // Reopening from payment history asks first, because the payment date is cleared.
+  const handleReopen = async (bill) => {
+    const ok = await confirm({
+      title: 'Reopen bill',
+      message: `Move "${bill.title}" back to Upcoming as unpaid? Its payment date will be cleared.${
+        bill.recurring ? ' The next month\'s bill that was created automatically will be removed if you have not changed it.' : ''
+      }`,
+      confirmLabel: 'Reopen',
+      variant: 'primary',
+    })
+    if (ok) reopenBill(bill.id)
   }
 
   const handleDelete = async (bill) => {
@@ -101,7 +129,7 @@ export default function Bills() {
           </button>
         </div>
 
-        <select className="filter-select" value={category} onChange={(e) => setCategory(e.target.value)}>
+        <select className="filter-select" aria-label="Filter by category" value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="All">All categories</option>
           {CATEGORIES.map((c) => (
             <option key={c} value={c}>{c}</option>
@@ -148,17 +176,19 @@ export default function Bills() {
                   <td data-label="Status"><StatusBadge status={getStatus(bill)} /></td>
                   <td>
                     <div className="row-actions">
-                      {bill.status !== 'paid' && (
-                        <>
-                          <button className="icon-btn" title="Mark as paid" onClick={() => markBillPaid(bill.id)}>
-                            <CheckCircle size={18} />
-                          </button>
-                          <button className="icon-btn" title="Edit" onClick={() => openEdit(bill)}>
-                            <Pencil size={18} />
-                          </button>
-                        </>
+                      {bill.status !== 'paid' ? (
+                        <button className="icon-btn" title="Mark as paid" aria-label={`Mark ${bill.title} as paid`} onClick={() => handleMarkPaid(bill)}>
+                          <CheckCircle size={18} />
+                        </button>
+                      ) : (
+                        <button className="icon-btn" title="Reopen (mark as unpaid)" aria-label={`Reopen ${bill.title}`} onClick={() => handleReopen(bill)}>
+                          <RotateCcw size={18} />
+                        </button>
                       )}
-                      <button className="icon-btn" title="Delete" onClick={() => handleDelete(bill)}>
+                      <button className="icon-btn" title="Edit" aria-label={`Edit ${bill.title}`} onClick={() => openEdit(bill)}>
+                        <Pencil size={18} />
+                      </button>
+                      <button className="icon-btn" title="Delete" aria-label={`Delete ${bill.title}`} onClick={() => handleDelete(bill)}>
                         <Trash2 size={18} />
                       </button>
                     </div>
