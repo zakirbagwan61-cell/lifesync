@@ -1670,3 +1670,25 @@ button.badge:hover {
     font-size: 17px;
   }
 }
+
+/* Save problem notice (above the page content) */
+.save-warning {
+  margin: var(--space-3) var(--space-8) 0;
+  align-items: flex-start;
+}
+
+.save-warning p {
+  flex: 1;
+  min-width: 0;
+}
+
+.save-warning .btn-small {
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .save-warning {
+    margin: var(--space-3) var(--space-4) 0;
+    flex-wrap: wrap;
+  }
+}

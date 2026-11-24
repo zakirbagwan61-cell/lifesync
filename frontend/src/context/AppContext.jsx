@@ -75,13 +75,16 @@ const docLabel = (d) => (d ? `${d.type} (${d.holder})` : 'Document')
 
 export function AppProvider({ children }) {
   const [userName, setUserName] = useLocalStorage('lifesync_user', 'Friend', isText)
-  const [bills, setBills] = useLocalStorage('lifesync_bills', createSeedBills(), isRecordList)
-  const [documents, setDocuments] = useLocalStorage('lifesync_documents', createSeedDocuments(), isRecordList)
-  const [subscriptions, setSubscriptions] = useLocalStorage('lifesync_subscriptions', createSeedSubscriptions(), isRecordList)
-  const [tasks, setTasks] = useLocalStorage('lifesync_tasks', createSeedTasks(), isRecordList)
-  const [appointments, setAppointments] = useLocalStorage('lifesync_appointments', createSeedAppointments(), isRecordList)
+  const [bills, setBills, getBills] = useLocalStorage('lifesync_bills', createSeedBills(), isRecordList)
+  const [documents, setDocuments, getDocuments] = useLocalStorage('lifesync_documents', createSeedDocuments(), isRecordList)
+  const [subscriptions, setSubscriptions, getSubscriptions] = useLocalStorage('lifesync_subscriptions', createSeedSubscriptions(), isRecordList)
+  const [tasks, setTasks, getTasks] = useLocalStorage('lifesync_tasks', createSeedTasks(), isRecordList)
+  const [appointments, setAppointments, getAppointments] = useLocalStorage('lifesync_appointments', createSeedAppointments(), isRecordList)
   const [activity, setActivity] = useLocalStorage('lifesync_activity', [], isRecordList)
   const [snoozes, setSnoozes] = useLocalStorage('lifesync_snoozes', {}, isPlainObject)
+
+  // Actions below look things up with getBills(), getTasks() and so on: those return the newest list even
+  // when an action runs twice before React re-renders (a double click), so nothing is logged twice or wrongly.
 
   // ----- Activity log -----
   // type: bill | document | subscription | task | appointment
@@ -125,20 +128,20 @@ export function AppProvider({ children }) {
   }
 
   const updateBill = (id, changes) => {
-    const bill = bills.find((b) => b.id === id)
+    const bill = getBills().find((b) => b.id === id)
     setBills((prev) => prev.map((b) => (b.id === id ? { ...b, ...changes } : b)))
     logActivity('bill', 'updated', changes.title || bill?.title || 'Bill', id)
   }
 
   const deleteBill = (id) => {
-    const bill = bills.find((b) => b.id === id)
+    const bill = getBills().find((b) => b.id === id)
     setBills((prev) => prev.filter((b) => b.id !== id))
     logActivity('bill', 'deleted', bill?.title || 'Bill', id)
   }
 
   // Mark a bill paid. If it repeats monthly, also create next month's bill.
   const markBillPaid = (id) => {
-    const bill = bills.find((b) => b.id === id)
+    const bill = getBills().find((b) => b.id === id)
     if (!bill || bill.status === 'paid') return
 
     setBills((prev) => {
@@ -165,10 +168,9 @@ export function AppProvider({ children }) {
 
   // Turn a paid bill back into a pending one ("Undo" after paying, or "Reopen" in payment history).
   // The list change is a pure function (utils/bills.js) that also removes the automatic next-month
-  // copy of a recurring bill when it is still untouched. The title for the log is read from the
-  // list we have; if this runs from an Undo button the list may be a moment old, which is fine.
+  // copy of a recurring bill when it is still untouched.
   const reopenBill = (id) => {
-    const bill = bills.find((b) => b.id === id)
+    const bill = getBills().find((b) => b.id === id)
     setBills((prev) => reopenBillInList(prev, id))
     logActivity('bill', 'reopened', bill?.title || 'Bill', id)
   }
@@ -181,13 +183,13 @@ export function AppProvider({ children }) {
   }
 
   const updateDocument = (id, changes) => {
-    const doc = documents.find((d) => d.id === id)
+    const doc = getDocuments().find((d) => d.id === id)
     setDocuments((prev) => prev.map((d) => (d.id === id ? { ...d, ...changes } : d)))
     logActivity('document', 'updated', docLabel(doc ? { ...doc, ...changes } : changes), id)
   }
 
   const deleteDocument = (id) => {
-    const doc = documents.find((d) => d.id === id)
+    const doc = getDocuments().find((d) => d.id === id)
     setDocuments((prev) => prev.filter((d) => d.id !== id))
     logActivity('document', 'deleted', docLabel(doc), id)
   }
@@ -200,20 +202,20 @@ export function AppProvider({ children }) {
   }
 
   const updateSubscription = (id, changes) => {
-    const sub = subscriptions.find((s) => s.id === id)
+    const sub = getSubscriptions().find((s) => s.id === id)
     setSubscriptions((prev) => prev.map((s) => (s.id === id ? { ...s, ...changes } : s)))
     logActivity('subscription', 'updated', changes.name || sub?.name || 'Subscription', id)
   }
 
   const deleteSubscription = (id) => {
-    const sub = subscriptions.find((s) => s.id === id)
+    const sub = getSubscriptions().find((s) => s.id === id)
     setSubscriptions((prev) => prev.filter((s) => s.id !== id))
     logActivity('subscription', 'deleted', sub?.name || 'Subscription', id)
   }
 
   // Mark a subscription as renewed: move the renewal date forward by one billing cycle.
   const renewSubscription = (id) => {
-    const sub = subscriptions.find((s) => s.id === id)
+    const sub = getSubscriptions().find((s) => s.id === id)
     setSubscriptions((prev) =>
       prev.map((s) =>
         s.id === id
@@ -232,20 +234,20 @@ export function AppProvider({ children }) {
   }
 
   const updateTask = (id, changes) => {
-    const task = tasks.find((t) => t.id === id)
+    const task = getTasks().find((t) => t.id === id)
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...changes } : t)))
     logActivity('task', 'updated', changes.title || task?.title || 'Task', id)
   }
 
   const deleteTask = (id) => {
-    const task = tasks.find((t) => t.id === id)
+    const task = getTasks().find((t) => t.id === id)
     setTasks((prev) => prev.filter((t) => t.id !== id))
     logActivity('task', 'deleted', task?.title || 'Task', id)
   }
 
   // Flip a task between pending and completed.
   const toggleTask = (id) => {
-    const task = tasks.find((t) => t.id === id)
+    const task = getTasks().find((t) => t.id === id)
     if (!task) return
     setTasks((prev) =>
       prev.map((t) =>
@@ -265,19 +267,19 @@ export function AppProvider({ children }) {
   }
 
   const updateAppointment = (id, changes) => {
-    const appt = appointments.find((a) => a.id === id)
+    const appt = getAppointments().find((a) => a.id === id)
     setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, ...changes } : a)))
     logActivity('appointment', 'updated', changes.title || appt?.title || 'Appointment', id)
   }
 
   const deleteAppointment = (id) => {
-    const appt = appointments.find((a) => a.id === id)
+    const appt = getAppointments().find((a) => a.id === id)
     setAppointments((prev) => prev.filter((a) => a.id !== id))
     logActivity('appointment', 'deleted', appt?.title || 'Appointment', id)
   }
 
   const toggleAppointment = (id) => {
-    const appt = appointments.find((a) => a.id === id)
+    const appt = getAppointments().find((a) => a.id === id)
     if (!appt) return
     setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, completed: !a.completed } : a)))
     logActivity('appointment', appt.completed ? 'reopened' : 'completed', appt.title, id)
