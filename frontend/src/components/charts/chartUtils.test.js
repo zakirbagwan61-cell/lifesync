@@ -50,7 +50,8 @@ describe('monthWindow', () => {
 })
 
 describe('spendingByMonth', () => {
-  const months = monthWindow(2) // Sep, Oct, Nov
+  let months
+  beforeEach(() => { months = monthWindow(2) }) // Sep, Oct, Nov: after the fake clock is set
 
   it('adds up paid bills by the month they were paid', () => {
     const { data, hidden } = spendingByMonth(
@@ -133,7 +134,8 @@ describe('paymentStatus', () => {
 })
 
 describe('tasksByMonth', () => {
-  const months = monthWindow(1, 1) // Oct, Nov, Dec
+  let months
+  beforeEach(() => { months = monthWindow(1, 1) }) // Oct, Nov, Dec: after the fake clock is set
   const task = (completed, completedAt, deadline) => ({ id: Math.random(), title: 't', priority: 'Low', completed, completedAt, deadline })
 
   it('counts completed tasks by completion month and pending tasks by deadline month', () => {
