@@ -24,7 +24,7 @@ export function freezeToday() {
 export function renderApp(route = '/', { storage = storageFixture() } = {}) {
   seedStorage(storage)
   return render(
-    <MemoryRouter initialEntries={[route]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <MemoryRouter initialEntries={[route]}>
       <AppProvider>
         <ConfirmProvider>
           <ToastProvider>
